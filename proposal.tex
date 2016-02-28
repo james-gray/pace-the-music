@@ -1,0 +1,126 @@
+\documentclass{article}
+\usepackage{ismir,amsmath,cite}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[hyphens]{url}
+\urlstyle{same}
+
+% Title.
+% ------
+\title{Pace the Music: Activity-Based Playlist Generator}
+
+
+\threeauthors
+  {James Gray} {University of Victoria \\ {\tt grayj@uvic.ca}}
+  {Kaileen McCulloch} {Unviersity of Victoria \\ {\tt kaileenm@uvic.ca}}
+  {Nick Warwick} {University of Victoria \\ {\tt nwarwick@uvic.ca}}
+
+
+\begin{document}
+%
+\maketitle
+%
+\begin{abstract}
+The following design specification outlines our plan to create a physical activity based playlist generation utility. It specifies the goals of our project, and provides a development timeline along with a list of tools required for development. This document also lists the roles of each team member, and provides links to any resources that we use during development.
+\end{abstract}
+%
+\section{Introduction}
+Many people enjoy listening to music while they exercise, and in many cases music itself can motivate the listener to put in even more effort than they would otherwise. \cite{Shivar} However, some types of exercise require strict adherence to a pre-existing training plan - for example, runners and cyclists often train at different paces for different portions of their activity. In these instances, the influence of music on an athlete’s pace or performance could be detrimental; a very fast song might subconsciously cause a runner to run at a faster pace than they intended to.
+
+To address this problem, we plan to create a playlist generation utility with a focus on creating playlists for various types of physical activity such as running, cycling, or strength training. The user of this utility will input an activity plan, specifying features such as running pace or step frequency over the course of the activity. Given the plan as input, the playlist generation utility will create a playlist from an existing set of songs, basing the playlist on audio features such as tempo, genre, mood, and subjective energy level.
+
+As an example, a user could create a running plan which specifies that they will run at a slow pace for fifteen minutes, increasing to a medium pace for twenty minutes, fast for ten minutes, and finally cooling down at a slow pace for five minutes. Given this input, the utility would generate a playlist containing songs at a slower tempo for the first fifteen minutes, moving to faster music as the pace of the run increases, following the user-created plan as closely as possible.
+
+\section{Related Work}
+Playlist generation is a popular topic in the field of MIR. Creating the right playlist to supplement an activity is a complex problem, and automating the process is even more so. There are a wide variety of external factors that can be used for playlist generation. For example, Oliver and Kreger-Stickles created a generator which bases the decision process on the user’s physiological response \cite{Oliver}. Similarly, Pauws and Eggen studied the correlation between the environment and the type of music a given user would listen to in that environment \cite{Pauws}. Environment-based playlists are also present in streaming music applications such as Google Play Music and Spotify, which allow users to choose playlists based on their location - for example, in the shower or at a coffee shop. Additional factors and methods in playlist generation include random shuffle, content \cite{Logan}, frequency spectrum, and skipping behaviour \cite{Pampalk}.
+
+Our idea of generating playlists based on user-specified activity plans is similar to the work done by Masahiro et al. \cite{Masahiro} and Chen et al. \cite{Chen}. Masahiro et al. worked on the development of an automatic music selection system based on a runner’s step frequency, and Chen et al. developed a music assisted run trainer which also uses step frequency to slow down or speed up the tempo of the music to match the user's pace. We plan on using step frequency as one of the decision features in our algorithm; however, the step frequency we plan on using will not be a real-time measurement, but rather a calculation based on the user-specified activity plan.
+
+Tempo tracking and audio feature analysis are other key components of our research. Musical tempo has been identified as an important component of music classification \cite{McKinney} \cite{Pikrakis} \cite{Alonso}. Other audio feature extraction techniques which have been explored are intensity, timbre, rhythm, and mood tracking \cite{Liu} which may also play a role in our playlist generator's selection algorithm.
+
+\section{Timeline}
+The following development timeline outlines the major stages of the project and their estimated completion dates.
+
+\begin{enumerate}
+    \item \textbf{Determine goals:} Determine the goals for the end product and what capabilities it should have. We will also decide on a platform for the application. ({\it February 22nd to 23rd})
+    \item \textbf{Requirements gathering:} Develop functional and non-functional requirements for the project. These will outline our functionality goals for the final product. ({\it February 23rd to 26th})
+    \item \textbf{Design:} Decide on a system layout. After a system layout has been determined we will begin development on the UI and start structuring the backend of the application. ({\it February 26th to March 1st})
+    \item \textbf{Prototyping:} Complete a rough version of the application with basic functionality. ({\it March 1st to 21st})
+    \item \textbf{Testing and revision:} Test the prototype to ensure that it is working as intended and that all requirements have been met. After testing is complete we will make any necessary revisions and re-test as need\-ed. ({\it March 17th to April 1st})
+    \item \textbf{Release:} Complete development of the final version of the application. ({\it April 1st to 5th})
+\end{enumerate}
+
+\section{Tools and Resources}
+The project will require a range of tools and technologies, from audio feature extraction and analysis tools to database utilities, application and UI logic.
+
+\subsection{Backend}
+We intend to program the core application logic with Python. This code will interface between the various layers of the utility, such as the core playlist generation logic, the database, the audio feature extraction logic, and the UI code.
+
+\subsection{Database}
+To create a playlist, the utility will need access to a set of songs. The song files will be stored on disk, and any additional metadata or audio features will be stored alongside the files in a database. We intend to use a MySQL database alongside a Python database interaction utility such as SQL\-Alchemy \cite{SQLAlchemy}. Additionally we intend to build a corpus of song files using Music21 \cite{Music21}.
+
+\subsection{Audio Feature Extraction}
+The audio files themselves will need to be analyzed in order to extract the necessary features from the music, such as BPM information. We plan to use Marsyas and the associated Python bindings to extract this information, which will then be stored in the database in order to refer to it later.
+
+\subsection{GUI}
+Our current plan is to create a standalone desktop utility or application. The GUI for this application will be created using a Python UI library or framework, such as PyJamas \cite{Pyjs}, PyQT \cite{PyQT}, or TkInter \cite{TkInter}.
+
+\section{Team Roles}
+The roles of each team member are loosely defined as follows; however, they are subject to change, and team members will contribute in other areas of the project as needed. Nick will be in charge of GUI design and front-end development, James will handle back-end design and database logic, and Kaileen will be in charge of developing feature extraction logic.
+
+\section{Conclusion}
+While plenty of existing work has addressed the problem of playlist generation, activity-based playlist generation remains a relatively unexplored problem. Using the tools and resources outlined above, we intend to create a powerful, user-friendly utility that will provide some helpful insights into the topic of activity-based playlist generation.
+
+\begin{thebibliography}{cites}
+\raggedright
+\bibitem {Shivar}
+N. Shivar. ``How I Cut 1:57 Off My Average 5k Time By Tweaking My Playlist.'' \url{http://www.nateshivar.com/1182/how-i-cut-157-off-my-average-5k-time-by-tweaking-my-playlist/}, 2015.
+
+\bibitem {Oliver}
+N. Oliver and L. Kreger-Stickles. ``PAPA: Physiology and Purpose-­Aware Automatic Playlist Generation.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} \url{http://ismir2006.ismir.net/PAPERS/ISMIR06162_Paper.pdf}, 2006.
+
+\bibitem {Pauws}
+S. Pauws and B. Eggen. ``PATS: Realization and User Evaluation of an Automatic Playlist Generator.'' In {\it Proceedings of the International Symposium on Music Information Retrieval}. \url{http://www.ismir2002.ismir.net/proceedings/02FP074.pdf}, 2002.
+
+\bibitem {Logan}
+B. Logan. ``Content-­Based Playlist Generation: Exploratory Experiments.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} \url{http://www.ismir2002.ismir.net/proceedings/03SP052.pdf}, 2002.
+
+\bibitem {Pampalk}
+E. Pampalk, T. Pohle and G. Widmer. ``Dynamic Playlist Generation Based on Skipping Behavior.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} \url{http://cis.ofai.at/~elias.pampalk/publications/pam_ismir05b.pdf}, 2005.
+
+\bibitem {Masahiro}
+N. Masahiro, H. Takaesu, H. Demachi, M. Oono and H. Saito. ``Development of an Automatic Music Selection System Based on Runner’s Step Frequency.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} 2008.
+
+\bibitem {Chen}
+L. Chen, Y. Tung and J. R. Jang. ``MART: Music Assisted Run Trainer.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} \url{http://www.terasoft.com.tw/conf/ismir2014/LBD/LBD24.pdf}, 2014.
+
+\bibitem {McKinney}
+M. McKinney and J. Breebaart. ``Features for Audio and Music Classification.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} \url{https://jscholarship.library.jhu.edu/handle/1774.2/22}, 2003.
+
+\bibitem {Pikrakis}
+A. Pikrakis, I. Antonopoulos and S. Theodoridis. ``Music Meter and Tempo Tracking from Raw Polyphonic Audio.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} \url{http://www.ee.columbia.edu/~dpwe/ismir2004/CRFILES/paper160.pdf}, 2004.
+
+\bibitem {Alonso}
+M. Alonso, B. David and G. Richard. ``Tempo and Beat Estimation of Musical Signals.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} \url{http://www.ee.columbia.edu/~dpwe/ismir2004/CRFILES/paper191.pdf}, 2004.
+
+\bibitem {Liu}
+D. Liu, L. Lu and H. Zhang. ``Automatic Mood Detection from Acoustic Music Data.'' In {\it Proceedings of the International Symposium on Music Information Retrieval.} \url{https://jscholarship.library.jhu.edu/handle/1774.2/14}, 2003.
+
+\bibitem {SQLAlchemy}
+``SQLAlchemy.'' \url{http://www.sqlalchemy.org}, 2016.
+
+\bibitem {Music21}
+``Music21.corpus.'' {\it Music21 Module Reference.} \url{http://web.mit.edu/music21/doc/moduleReference/moduleCorpus.html}, 2015.
+
+\bibitem {Pyjs}
+``Pyjs.'' \url{http://pyjs.org/Overview.html}, 2016.
+
+\bibitem {PyQT}
+``PyQT.'' \url{https://www.riverbankcomputing.com/software/pyqt}, 2015.
+
+\bibitem {TkInter}
+``TkInter.'' \url{http://tkinter.unpythonic.net}, 2014.
+
+\end{thebibliography}
+
+\end{document}
