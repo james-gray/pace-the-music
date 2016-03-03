@@ -1,11 +1,11 @@
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.mysql import BIGINT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
+from sqlalchemy.types import Float
 from sqlalchemy.types import Integer
-from sqlalchemy.types import Unicode
+from sqlalchemy.types import String
 
 Base = declarative_base()
 
@@ -17,12 +17,12 @@ class Artist(Base):
     __tablename__ = 'artists'
 
     # State
-    id = Column(BIGINT, primary_key=True, autoincrement=True)
-    name = Column(Unicode(250), nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
 
     # Behaviour
     def __repr__(self):
-        return '<Artist(name="%s")' % self.name
+        return '<Artist(name="%s")>' % self.name
 
 class Song(Base):
     """
@@ -32,12 +32,11 @@ class Song(Base):
     __tablename__ = 'songs'
 
     # State
-    id = Column(BIGINT, primary_key=True, autoincrement=True)
-    filename = Column(Unicode(250), nullable=False)
-    title = Column(Unicode(250))
-    duration = Column(Integer, default=0, nullable=False)
+    id = Column(Integer, primary_key=True)
+    filename = Column(String, nullable=False)
+    title = Column(String)
     date_added = Column(DateTime, nullable=False)
-    artist_id = Column(BIGINT, ForeignKey('artists.id'))
+    artist_id = Column(Integer, ForeignKey('artists.id'))
 
     # Relationships
     artist = relationship('Artist', back_populates='songs')
@@ -57,9 +56,11 @@ class SongMeta(Base):
     __tablename__ = 'songs_meta'
 
     # State
-    id = Column(BIGINT, primary_key=True, autoincrement=True)
-    bpm = Column(Integer, default=0)
-    song_id = Column(BIGINT, ForeignKey('songs.id'))
+    id = Column(Integer, primary_key=True)
+    duration = Column(Integer)
+    bpm = Column(Float) # The BPM of the song
+    energy = Column(Float) # Energy of the song (float value between 0 and 1)
+    song_id = Column(Integer, ForeignKey('songs.id'))
 
     # Relationships
     song = relationship('Song', back_populates='meta')
