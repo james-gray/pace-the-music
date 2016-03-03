@@ -1,11 +1,16 @@
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
 from sqlalchemy.types import Float
 from sqlalchemy.types import Integer
 from sqlalchemy.types import String
+
+from config import db
+
+engine = create_engine('sqlite:///%s' % db['path'], echo=True)
 
 Base = declarative_base()
 

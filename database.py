@@ -5,16 +5,14 @@ import subprocess
 import sys
 
 import sqlalchemy
-from sqlalchemy import create_engine
 
 from model import Base
+from model import engine
 
 from config import db
 
 parser = argparse.ArgumentParser(description='Database helper functions')
 parser.add_argument('action', help='One of: `create`, `drop`')
-
-engine = create_engine('sqlite:///%s' % db['path'], echo=True)
 
 def setup_database():
     '''
