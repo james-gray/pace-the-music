@@ -25,12 +25,8 @@ Setting up the app
 ==================
 
 To set up the database you will need to make sure that you have MySQL 5.7 installed.
-After installing MySQL, ensure you have created a root database user::
 
-   mysql> CREATE USER 'root'@'localhost' IDENTIFIED BY 'some_password';
-
-Next, copy `config_template.py` to the file `config.py` and edit the DB host, user,
-and password strings accordingly to match the new user. Finally, create the DB and tables::
+Next, copy `config_template.py` to the file `config.py` and set the path to 'ptm.db'. Finally, create the DB and tables::
 
    $ ./database.py create
 
