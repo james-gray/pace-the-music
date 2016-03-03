@@ -26,7 +26,9 @@ def setup_database():
 
     try:
         args = [
-            'mysql', '-u%s' % db['user'], '-p%s' % db['pass'],
+            'mysql',
+            '-u%s' % db['user'],
+            '-p%s' % db['pass'],
             '-e', 'CREATE DATABASE IF NOT EXISTS %s;' % db['name'],
         ]
         print(args)
