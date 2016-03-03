@@ -20,8 +20,6 @@ def setup_database():
     '''
     Create the database and its tables.
     '''
-    print('Creating database %s...' % db['path'])
-
     print('Creating tables...')
     try:
         Base.metadata.create_all(engine)
