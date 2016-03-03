@@ -13,8 +13,10 @@ from config import db
 parser = argparse.ArgumentParser(description='Database helper functions')
 parser.add_argument('action', help='One of: `create`, `drop`')
 
-# Note: You will need to make sure the MySQL user specified in the config file
-# exists before creating the DB!
+# TODO: Ditch MySQL and sqitch to a SQLite database
+# It doesn't really make sense to require the (theoretical) user to have
+# MySQL installed (a complicated and large thing to do) in order to use this
+# utility
 engine = create_engine('mysql+pymysql://%s:%s@%s/%s' \
     % (db['user'], db['pass'], db['host'], db['name']))
 
