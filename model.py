@@ -37,7 +37,7 @@ class Song(Base):
     title = Column(Unicode(250))
     duration = Column(Integer, default=0, nullable=False)
     date_added = Column(DateTime, nullable=False)
-    artist_id = Column(BIGINT, ForeignKey('artist.id'))
+    artist_id = Column(BIGINT, ForeignKey('artists.id'))
 
     # Relationships
     artist = relationship('Artist', back_populates='songs')
@@ -59,7 +59,7 @@ class SongMeta(Base):
     # State
     id = Column(BIGINT, primary_key=True, autoincrement=True)
     bpm = Column(Integer, default=0)
-    song_id = Column(BIGINT, ForeignKey('song.id'))
+    song_id = Column(BIGINT, ForeignKey('songs.id'))
 
     # Relationships
     song = relationship('Song', back_populates='meta')
