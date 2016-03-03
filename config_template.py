@@ -1,6 +1,6 @@
 db = {
     'user': '',
     'pass': '',
-    'name': '',
     'host': '',
+    'name': 'ptm',
 }
