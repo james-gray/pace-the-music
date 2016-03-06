@@ -1,11 +1,16 @@
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.mysql import BIGINT
+from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
+from sqlalchemy.types import Float
 from sqlalchemy.types import Integer
-from sqlalchemy.types import Unicode
+from sqlalchemy.types import String
+
+from config import db
+
+engine = create_engine('sqlite:///%s' % db['path'], echo=True)
 
 Base = declarative_base()
 
@@ -17,12 +22,15 @@ class Artist(Base):
     __tablename__ = 'artists'
 
     # State
-    id = Column(BIGINT, primary_key=True, autoincrement=True)
-    name = Column(Unicode(250), nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+    # Relationships
+    songs = relationship('Song', back_populates='artist')
 
     # Behaviour
     def __repr__(self):
-        return '<Artist(name="%s")' % self.name
+        return '<Artist(name="%s")>' % self.name
 
 class Song(Base):
     """
@@ -32,12 +40,11 @@ class Song(Base):
     __tablename__ = 'songs'
 
     # State
-    id = Column(BIGINT, primary_key=True, autoincrement=True)
-    filename = Column(Unicode(250), nullable=False)
-    title = Column(Unicode(250))
-    duration = Column(Integer, default=0, nullable=False)
+    id = Column(Integer, primary_key=True)
+    filename = Column(String, nullable=False)
+    title = Column(String)
     date_added = Column(DateTime, nullable=False)
-    artist_id = Column(BIGINT, ForeignKey('artists.id'))
+    artist_id = Column(Integer, ForeignKey('artists.id'))
 
     # Relationships
     artist = relationship('Artist', back_populates='songs')
@@ -57,11 +64,61 @@ class SongMeta(Base):
     __tablename__ = 'songs_meta'
 
     # State
-    id = Column(BIGINT, primary_key=True, autoincrement=True)
-    bpm = Column(Integer, default=0)
-    song_id = Column(BIGINT, ForeignKey('songs.id'))
+    id = Column(Integer, primary_key=True)
+    duration = Column(Integer) # Duration in seconds
+    bpm = Column(Float) # The BPM of the song
+    energy = Column(Float) # Energy of the song (float value between 0 and 1)
+    song_id = Column(Integer, ForeignKey('songs.id'))
 
     # Relationships
     song = relationship('Song', back_populates='meta')
 
-Artist.songs = relationship('Song', order_by=Song.id, back_populates='artist')
+class Pace(Base):
+    """
+    Pace object to be used in a Segment. One of: Slow, Steady, Fast, Sprint.
+    """
+    __tablename__ = 'paces'
+
+    # State
+    id = Column(Integer, primary_key=True)
+    speed = Column(String, nullable=False)
+
+class ActivityPlan(Base):
+    """
+    Named activity plan object which will be associated with several Segments
+    via the plans_segments join table.
+    """
+    __tablename__ = 'activity_plans'
+
+    # State
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False) # User-specified plan name (e.g. "HIIT Run")
+
+    # Relationships
+    # TODO: Be able to retrieve the ordered list of segments somehow
+    segments = relationship('Segment', back_populates='plan')
+
+
+class Segment(Base):
+    """
+    Segment object containing both a Pace and a time in seconds, tied to an
+    ActivityPlan.
+
+    This functions as a join table which maps ActivityPlans, using a doubly
+    linked list structure to enforce an ordering of Segments in an ActivityPlan.
+    """
+    __tablename__ = 'segments'
+
+    # State
+    id = Column(Integer, primary_key=True)
+    plan_id = Column(Integer, ForeignKey('activity_plans.id'), nullable=False)
+    pace_id = Column(Integer, ForeignKey('paces.id'), nullable=False)
+    length = Column(Integer, nullable=False)
+    previous_id = Column(Integer, ForeignKey('segments.id'))
+    next_id = Column(Integer, ForeignKey('segments.id'))
+
+    # Relationships
+    plan = relationship('ActivityPlan', back_populates='segments')
+    pace = relationship('Pace')
+    previous = relationship('Segment', foreign_keys='[Segment.previous_id]')
+    next = relationship('Segment', foreign_keys='[Segment.next_id]')
