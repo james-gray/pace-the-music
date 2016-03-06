@@ -1,8 +1,12 @@
+from sqlalchemy import sql
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.types import DateTime
 from sqlalchemy.types import Float
 from sqlalchemy.types import Integer
@@ -11,6 +15,8 @@ from sqlalchemy.types import String
 from config import db
 
 engine = create_engine('sqlite:///%s' % db['path'], echo=True)
+DBSession = scoped_session(sessionmaker(bind=engine))
+session = DBSession()
 
 Base = declarative_base()
 
@@ -20,6 +26,7 @@ class Artist(Base):
     Artist for many Songs.
     """
     __tablename__ = 'artists'
+    query = DBSession.query_property()
 
     # State
     id = Column(Integer, primary_key=True)
@@ -38,6 +45,7 @@ class Song(Base):
     Artist as well as a SongMeta.
     """
     __tablename__ = 'songs'
+    query = DBSession.query_property()
 
     # State
     id = Column(Integer, primary_key=True)
@@ -62,6 +70,7 @@ class SongMeta(Base):
     SongMetas.
     """
     __tablename__ = 'songs_meta'
+    query = DBSession.query_property()
 
     # State
     id = Column(Integer, primary_key=True)
@@ -78,6 +87,7 @@ class Pace(Base):
     Pace object to be used in a Segment. One of: Slow, Steady, Fast, Sprint.
     """
     __tablename__ = 'paces'
+    query = DBSession.query_property()
 
     # State
     id = Column(Integer, primary_key=True)
@@ -89,15 +99,58 @@ class ActivityPlan(Base):
     via the plans_segments join table.
     """
     __tablename__ = 'activity_plans'
+    query = DBSession.query_property()
 
     # State
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False) # User-specified plan name (e.g. "HIIT Run")
+    num_segments = Column(Integer, default=0, nullable=False)
 
-    # Relationships
-    # TODO: Be able to retrieve the ordered list of segments somehow
-    segments = relationship('Segment', back_populates='plan')
+    def add_segment(self, pace, length):
+        prev = None if self.num_segments == 0 else self.last_segment
+        seg = Segment(
+            plan=self,
+            pace=pace,
+            length=length,
+            prev=prev,
+            next=None,
+        )
 
+        if prev:
+            prev.next = seg
+            session.add(prev)
+
+        self.num_segments += 1
+        session.add(self)
+        session.add(seg)
+        session.commit()
+
+    @hybrid_property
+    def segments(self):
+        segments = []
+        if self.num_segments == 0:
+            return segments
+
+        seg = Segment.query.filter(sql.and_(
+            Segment.plan_id==self.id,
+            Segment.prev_id==None,
+        )).first()
+        segments.append(seg)
+
+        while seg.next:
+            seg = seg.next
+            segments.append(seg)
+
+        return segments
+
+    @hybrid_property
+    def last_segment(self):
+        if self.num_segments == 0:
+            return None
+        return Segment.query.filter(sql.and_(
+            Segment.plan_id==self.id,
+            Segment.next_id==None,
+        )).first()
 
 class Segment(Base):
     """
@@ -108,17 +161,18 @@ class Segment(Base):
     linked list structure to enforce an ordering of Segments in an ActivityPlan.
     """
     __tablename__ = 'segments'
+    query = DBSession.query_property()
 
     # State
     id = Column(Integer, primary_key=True)
     plan_id = Column(Integer, ForeignKey('activity_plans.id'), nullable=False)
     pace_id = Column(Integer, ForeignKey('paces.id'), nullable=False)
     length = Column(Integer, nullable=False)
-    previous_id = Column(Integer, ForeignKey('segments.id'))
-    next_id = Column(Integer, ForeignKey('segments.id'))
+    prev_id = Column(Integer, ForeignKey('segments.id'), nullable=True)
+    next_id = Column(Integer, ForeignKey('segments.id'), nullable=True)
 
     # Relationships
-    plan = relationship('ActivityPlan', back_populates='segments')
+    plan = relationship('ActivityPlan')
     pace = relationship('Pace')
-    previous = relationship('Segment', foreign_keys='[Segment.previous_id]')
+    prev = relationship('Segment', foreign_keys='[Segment.prev_id]')
     next = relationship('Segment', foreign_keys='[Segment.next_id]')

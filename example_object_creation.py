@@ -3,16 +3,16 @@ from datetime import datetime
 
 from sqlalchemy.orm import sessionmaker
 
+from model import ActivityPlan
 from model import Artist
+from model import Pace
+from model import Segment
 from model import Song
 from model import engine
-
-Session = sessionmaker(bind=engine)
+from model import session
 
 def main():
     # Create the database session.
-    # TODO: Figure out a better way to reuse the session throughout our code
-    session = Session()
 
     # Create artists
     kanye = Artist(name='Kanye West')
@@ -50,6 +50,14 @@ def main():
     session.add(love_lockdown)
     session.add(requiem)
     session.flush()
+
+    slow, steady, fast, sprint = Pace(speed='Slow'), Pace(speed='Steady'), \
+        Pace(speed='Fast'), Pace(speed='Sprint')
+
+    session.add(slow)
+    session.add(steady)
+    session.add(fast)
+    session.add(sprint)
 
     session.commit()
 
