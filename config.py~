@@ -1,6 +1,0 @@
-db = {
-    'user': 'nick',
-    'pass': 'google',
-    'host': 'local',
-    'name': 'ptm',
-}
