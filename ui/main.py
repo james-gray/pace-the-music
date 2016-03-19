@@ -23,16 +23,18 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			print('Invalid time input')
 			return
 
-		time = self.timeInput.currentText() # Grab current text for time input box
+		time = self.timeInput.text() # Grab current text for time input box
 		pace = self.paceSelect.currentText() # Grab current text for pace input box
 		self.label_5.setText(time)
 		self.label_6.setText(pace)
-		add_segment()
+		
+
+		self.add_segment
 
 
 
 	def add_segment(self):
-		print 'TEST'
+		print 'PLACEHOLDER'
 
 
 
