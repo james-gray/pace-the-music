@@ -23,7 +23,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		except ValueError:
 			print('Invalid time input')
 			return
-			
+
 		pace = self.paceSelect.currentText()
 		self.label_5.setText(time)
 		self.label_6.setText(pace)
@@ -41,6 +41,8 @@ if __name__=='__main__':
 
 
 '''
+Names for buttons and widgets etc..
+
 INPUT: paceInput, timeInput
 BUTTON: addButton
 '''
