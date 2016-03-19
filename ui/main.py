@@ -1,7 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import layout
-import re # regexes yo
 
 # This class deals with GUI elements, adding connections to buttons etc..
 class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
@@ -24,9 +23,17 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			print('Invalid time input')
 			return
 
-		pace = self.paceSelect.currentText()
+		time = self.timeInput.currentText() # Grab current text for time input box
+		pace = self.paceSelect.currentText() # Grab current text for pace input box
 		self.label_5.setText(time)
 		self.label_6.setText(pace)
+		add_segment()
+
+
+
+	def add_segment(self):
+		print 'TEST'
+
 
 
 # Initialize the class on startup
