@@ -59,7 +59,14 @@ def main():
     session.add(fast)
     session.add(sprint)
 
-    session.commit()
+    plan = ActivityPlan(name='test')
+    session.add(plan)
+    session.flush()
+
+    plan.segments.append(Segment(pace=slow, length=60))
+    plan.segments.append(Segment(pace=steady, length=60))
+    plan.segments.append(Segment(pace=fast, length=60))
+    plan.segments.append(Segment(pace=sprint, length=60))
 
     print "Artists: %s, %s" % (kanye, mozart)
     print "Each artist's songs: Kanye: %s, Mozart: %s" % (kanye.songs, mozart.songs)
