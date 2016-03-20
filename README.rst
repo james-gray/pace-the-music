@@ -5,7 +5,7 @@ Pace the Music
 Prerequisites
 =============
 
-Pace the Music requires Python 3.5, MySQL 5.7 and PIP v8.0.3.
+Pace the Music requires Python 2.7, SQLite 3 and PIP v8.0.3.
 
 Installing Pace the Music
 =========================
