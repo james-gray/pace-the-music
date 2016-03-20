@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
@@ -104,53 +105,10 @@ class ActivityPlan(Base):
     # State
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False) # User-specified plan name (e.g. "HIIT Run")
-    num_segments = Column(Integer, default=0, nullable=False)
 
-    def add_segment(self, pace, length):
-        prev = None if self.num_segments == 0 else self.last_segment
-        seg = Segment(
-            plan=self,
-            pace=pace,
-            length=length,
-            prev=prev,
-            next=None,
-        )
-
-        if prev:
-            prev.next = seg
-            session.add(prev)
-
-        self.num_segments += 1
-        session.add(self)
-        session.add(seg)
-        session.commit()
-
-    @hybrid_property
-    def segments(self):
-        segments = []
-        if self.num_segments == 0:
-            return segments
-
-        seg = Segment.query.filter(sql.and_(
-            Segment.plan_id==self.id,
-            Segment.prev_id==None,
-        )).first()
-        segments.append(seg)
-
-        while seg.next:
-            seg = seg.next
-            segments.append(seg)
-
-        return segments
-
-    @hybrid_property
-    def last_segment(self):
-        if self.num_segments == 0:
-            return None
-        return Segment.query.filter(sql.and_(
-            Segment.plan_id==self.id,
-            Segment.next_id==None,
-        )).first()
+    # Relationships
+    segments = relationship('Segment', order_by='Segment.position',
+                            collection_class=ordering_list('position'))
 
 class Segment(Base):
     """
@@ -167,12 +125,9 @@ class Segment(Base):
     id = Column(Integer, primary_key=True)
     plan_id = Column(Integer, ForeignKey('activity_plans.id'), nullable=False)
     pace_id = Column(Integer, ForeignKey('paces.id'), nullable=False)
+    position = Column(Integer)
     length = Column(Integer, nullable=False)
-    prev_id = Column(Integer, ForeignKey('segments.id'), nullable=True)
-    next_id = Column(Integer, ForeignKey('segments.id'), nullable=True)
 
     # Relationships
     plan = relationship('ActivityPlan')
     pace = relationship('Pace')
-    prev = relationship('Segment', foreign_keys='[Segment.prev_id]')
-    next = relationship('Segment', foreign_keys='[Segment.next_id]')
