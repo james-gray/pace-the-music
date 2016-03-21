@@ -97,8 +97,9 @@ class PlaylistSong(Base, PtmBase):
         """
         Remove 'orphaned' PlaylistSongs (i.e. entries with no playlist_id.)
 
-        It isn't really a big deal if we have orphans in the database, however
-        they can be removed using this method if needed.
+        Ideally this won't need to be used if you only add/remove playlists_songs
+        using methods of Playlist, however if for whatever reason you end up with
+        orphans you can use this method.
         """
         cls.query.filter(cls.playlist_id == None).delete(synchronize_session='fetch')
 
