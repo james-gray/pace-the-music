@@ -5,6 +5,7 @@ from ptm.models.activity import ActivityPlan
 from ptm.models.activity import Pace
 from ptm.models.activity import Segment
 from ptm.models.music import Artist
+from ptm.models.music import Playlist
 from ptm.models.music import Song
 from ptm.models.base import session
 
@@ -46,6 +47,23 @@ def main():
     session.add(requiem)
     session.flush()
 
+    # Create a playlist
+    playlist = Playlist(name='test')
+    session.add(playlist)
+    session.flush()
+
+    # Add some songs to the playlist
+    playlist.append_song(stronger)
+    playlist.append_song(love_lockdown)
+    playlist.append_song(requiem)
+
+    # Delete a song from the playlist
+    playlist.delete_song(1)
+
+    # Insert a song at number 3 in the playlist
+    playlist.insert_song(2, love_lockdown)
+
+    # Create pace objects and add to session
     slow, steady, fast, sprint = Pace(speed='Slow'), Pace(speed='Steady'), \
         Pace(speed='Fast'), Pace(speed='Sprint')
 
@@ -54,6 +72,7 @@ def main():
     session.add(fast)
     session.add(sprint)
 
+    # Create an activity plan
     plan = ActivityPlan(name='test')
     session.add(plan)
     session.flush()
@@ -80,6 +99,7 @@ def main():
 
     print "Artists: %s, %s" % (kanye, mozart)
     print "Each artist's songs: Kanye: %s, Mozart: %s" % (kanye.songs, mozart.songs)
+    print "Playlist songs: %s" % playlist.songs
     print "Plan segments: %s" % plan.segments
 
 
