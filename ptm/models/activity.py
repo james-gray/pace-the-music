@@ -17,6 +17,10 @@ class Pace(Base, PtmBase):
     # State
     speed = Column(String, nullable=False)
 
+    # Behaviour
+    def __repr__(self):
+        return '<Pace(speed="%s")>' % self.speed
+
 class ActivityPlan(Base, PtmBase):
     """
     Named activity plan object which will be associated with several Segments
@@ -30,6 +34,10 @@ class ActivityPlan(Base, PtmBase):
     # Relationships
     segments = relationship('Segment', order_by='Segment.position',
                             collection_class=ordering_list('position'))
+
+    # Behaviour
+    def __repr__(self):
+        return '<ActivityPlan(name="%s")>' % self.name
 
 class Segment(Base, PtmBase):
     """
@@ -50,3 +58,10 @@ class Segment(Base, PtmBase):
     # Relationships
     plan = relationship('ActivityPlan')
     pace = relationship('Pace')
+
+    # Behaviour
+    def __repr__(self):
+        return '<Segment(pace="%s", length=%d)>' % (
+            self.pace.speed,
+            self.length,
+        )
