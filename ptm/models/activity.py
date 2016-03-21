@@ -87,7 +87,12 @@ class Segment(Base, PtmBase):
     __tablename__ = 'segments'
 
     # State
-    plan_id = Column(Integer, ForeignKey('activity_plans.id'), nullable=False)
+    # NB: Note that the `plan_id` can be NULL due to restrictions of SQLAlchemy's
+    # `ordering_list` collection class; if you need to delete a segment to make
+    # room for a new segment and the `plan_id` is not nullable, SQLAlchemy will
+    # raise an IntegrityError.
+    # See the WARNING heading at http://docs.sqlalchemy.org/en/latest/orm/extensions/orderinglist.html
+    plan_id = Column(Integer, ForeignKey('activity_plans.id'))
     pace_id = Column(Integer, ForeignKey('paces.id'), nullable=False)
     position = Column(Integer)
     length = Column(Integer, nullable=False)
