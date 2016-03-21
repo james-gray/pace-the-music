@@ -1,8 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QListWidgetItem
 import sys
 import layout
-
-segList = [] # Keep a list of the segments
 
 # This class deals with GUI elements, adding connections to buttons etc..
 class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
@@ -27,17 +26,16 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		time = self.timeInput.text() # Grab current text for time input box
 		pace = self.paceSelect.currentText() # Grab current text for pace input box
-		#self.label_5.setText(time)
-		#self.label_6.setText(pace)
-		
-
-		self.add_segment
+		self.add_segment(time, pace)
 
 
+	# adds a segment to the QListWidget
+	def add_segment(self, time, pace):
+		pos = str(self.segmentList.count()+1) # Set the position of the segment in the list
+		#print 'Length: ' + time + ' Pace: ' + pace
 
-	def add_segment(self):
-		print 'PLACEHOLDER'
-		self.segmentList.addItem(seg)
+		segment = QListWidgetItem(pos + ') ' + pace + '  ' + time + '(s)')
+		self.segmentList.addItem(segment)
 
 
 
