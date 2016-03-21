@@ -58,13 +58,27 @@ def main():
     session.add(plan)
     session.flush()
 
-    plan.segments.append(Segment(pace=slow, length=60))
-    plan.segments.append(Segment(pace=steady, length=60))
-    plan.segments.append(Segment(pace=fast, length=60))
-    plan.segments.append(Segment(pace=sprint, length=60))
+    # Add 4 segments to the plan
+    plan.append_segment(pace=steady, length=60)
+    plan.append_segment(pace=steady, length=60)
+    plan.append_segment(pace=slow, length=10)
+    plan.append_segment(pace=sprint, length=60)
+
+    # Whoops - I made a mistake and want to delete a segment!
+    plan.delete_segment(1)
+
+    # Fix the second segment
+    plan.update_segment(position=1, pace=fast, length=60)
+
+    # Add a segment to the beginning
+    plan.insert_segment(position=0, pace=slow, length=60)
+
+    session.commit()
 
     print "Artists: %s, %s" % (kanye, mozart)
     print "Each artist's songs: Kanye: %s, Mozart: %s" % (kanye.songs, mozart.songs)
+    print "Plan segments: %s" % plan.segments
+
 
 if __name__ == '__main__':
     main()
