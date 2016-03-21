@@ -7,7 +7,6 @@ from sqlalchemy.types import String
 
 from ptm.models.base import Base
 from ptm.models.base import PtmBase
-from ptm.models.base import session
 
 class Pace(Base, PtmBase):
     """
