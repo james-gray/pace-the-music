@@ -73,8 +73,6 @@ class ActivityPlan(Base, PtmBase):
         is purged from the database.
         """
         seg = self.segments.pop(position)
-        session.flush()
-        session.delete(seg)
 
 class Segment(Base, PtmBase):
     """
@@ -113,8 +111,7 @@ class Segment(Base, PtmBase):
         """
         Remove 'orphaned' segments (i.e. segments with no plan.)
 
-        Ideally this won't need to be used if you only add/remove segments using
-        methods of ActivityPlan, however if for whatever reason you end up with
-        orphans you can use this method.
+        It isn't really a big deal if we have orphans in the database, however
+        they can be removed using this method if needed.
         """
         cls.query.filter(cls.plan_id == None).delete(synchronize_session='fetch')

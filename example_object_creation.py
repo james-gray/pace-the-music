@@ -73,6 +73,9 @@ def main():
     # Add a segment to the beginning
     plan.insert_segment(position=0, pace=slow, length=60)
 
+    # Clean up orphaned segments
+    Segment.remove_orphans()
+
     session.commit()
 
     print "Artists: %s, %s" % (kanye, mozart)
