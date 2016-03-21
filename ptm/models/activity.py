@@ -23,8 +23,7 @@ class Pace(Base, PtmBase):
 
 class ActivityPlan(Base, PtmBase):
     """
-    Named activity plan object which will be associated with several Segments
-    via the plans_segments join table.
+    Named activity plan object which contains several Segments.
     """
     __tablename__ = 'activity_plans'
 
@@ -68,10 +67,9 @@ class ActivityPlan(Base, PtmBase):
 
     def delete_segment(self, position):
         """
-        Delete the segment at position `position` and ensure the deleted segment
-        is purged from the database.
+        Delete the segment at position `position`.
         """
-        seg = self.segments.pop(position)
+        self.segments.pop(position)
 
 class Segment(Base, PtmBase):
     """
