@@ -1,5 +1,6 @@
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
+from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import DateTime
 from sqlalchemy.types import Float
@@ -26,6 +27,81 @@ class Artist(Base, PtmBase):
     # Behaviour
     def __repr__(self):
         return '<Artist(name="%s")>' % self.name
+
+class Playlist(Base, PtmBase):
+    """
+    A Playlist object representing a playlist of Songs.
+    """
+    __tablename__ = 'playlists'
+
+    # State
+    name = Column(String, nullable=False) # User-specified playlist name
+
+    # Relationships
+    playlist_songs = relationship('PlaylistSong', order_by='PlaylistSong.position',
+                         collection_class=ordering_list('position'))
+
+    @property
+    def songs(self):
+        return [ps.song for ps in self.playlist_songs]
+
+    # Behaviour
+    def __repr__(self):
+        return '<Playlist(name="%s")>' % self.name
+
+    def append_song(self, song):
+        """
+        Append song `song` to the playlist.
+        """
+        ps = PlaylistSong(playlist=self, song=song)
+        self.playlist_songs.append(ps)
+
+    def insert_song(self, position, song):
+        """
+        Insert song `song` at position `position`
+        """
+        ps = PlaylistSong(playlist=self, song=song)
+        self.playlist_songs.insert(position, ps)
+
+    def delete_song(self):
+        """
+        Delete the song at position `position`.
+        """
+        self.playlist_songs.pop(position)
+
+class PlaylistSong(Base, PtmBase):
+    """
+    A many-to-many join table that maps Playlists to their Songs.
+    """
+    __tablename__ = 'playlists_songs'
+
+    # State
+    # NB: Note that the `playlist_id` can be NULL due to restrictions of SQLAlchemy's
+    # `ordering_list` collection class; if you need to delete a segment to make
+    # room for a new segment and the `playlist_id` is not nullable, SQLAlchemy will
+    # raise an IntegrityError.
+    # See the WARNING heading at http://docs.sqlalchemy.org/en/latest/orm/extensions/orderinglist.html
+    playlist_id = Column(Integer, ForeignKey('playlists.id'))
+    song_id = Column(Integer, ForeignKey('songs.id'), nullable=False)
+    position = Column(Integer)
+
+    # Relationships
+    playlist = relationship('Playlist')
+    song = relationship('Song')
+
+    # Behaviour
+    def __repr__(self):
+        return '<PlaylistSong(song="%s")>' % self.song.title
+
+    @classmethod
+    def remove_orphans(cls):
+        """
+        Remove 'orphaned' PlaylistSongs (i.e. entries with no playlist_id.)
+
+        It isn't really a big deal if we have orphans in the database, however
+        they can be removed using this method if needed.
+        """
+        cls.query.filter(cls.playlist_id == None).delete(synchronize_session='fetch')
 
 class Song(Base, PtmBase):
     """
