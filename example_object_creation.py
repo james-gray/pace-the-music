@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 from datetime import datetime
 
-from sqlalchemy.orm import sessionmaker
-
-from model import ActivityPlan
-from model import Artist
-from model import Pace
-from model import Segment
-from model import Song
-from model import engine
-from model import session
+from ptm.models.activity import ActivityPlan
+from ptm.models.activity import Pace
+from ptm.models.activity import Segment
+from ptm.models.music import Artist
+from ptm.models.music import Song
+from ptm.models.base import DBSession
 
 def main():
     # Create the database session.
+    session = DBSession()
 
     # Create artists
     kanye = Artist(name='Kanye West')
