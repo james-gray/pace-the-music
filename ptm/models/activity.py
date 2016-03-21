@@ -7,6 +7,7 @@ from sqlalchemy.types import String
 
 from ptm.models.base import Base
 from ptm.models.base import PtmBase
+from ptm.models.base import session
 
 class Pace(Base, PtmBase):
     """
@@ -43,6 +44,7 @@ class ActivityPlan(Base, PtmBase):
         Append a segment to the list with pace `pace` and length `length`.
         """
         self.segments.append(Segment(pace=pace, length=length))
+        session.flush()
 
     def insert_segment(self, position, pace, length):
         """
@@ -50,6 +52,7 @@ class ActivityPlan(Base, PtmBase):
         `position`.
         """
         self.segments.insert(position, Segment(pace=pace, length=length))
+        session.flush()
 
     def update_segment(self, position, pace=None, length=None):
         """
@@ -64,12 +67,15 @@ class ActivityPlan(Base, PtmBase):
         segment.pace = pace or segment.pace
         segment.length = length or segment.length
         self.segments[position] = segment
+        session.flush()
 
     def delete_segment(self, position):
         """
         Delete the segment at position `position`.
         """
-        self.segments.pop(position)
+        seg = self.segments.pop(position)
+        session.delete(seg)
+        session.flush()
 
 class Segment(Base, PtmBase):
     """
@@ -82,12 +88,7 @@ class Segment(Base, PtmBase):
     __tablename__ = 'segments'
 
     # State
-    # NB: Note that the `plan_id` can be NULL due to restrictions of SQLAlchemy's
-    # `ordering_list` collection class; if you need to delete a segment to make
-    # room for a new segment and the `plan_id` is not nullable, SQLAlchemy will
-    # raise an IntegrityError.
-    # See the WARNING heading at http://docs.sqlalchemy.org/en/latest/orm/extensions/orderinglist.html
-    plan_id = Column(Integer, ForeignKey('activity_plans.id'))
+    plan_id = Column(Integer, ForeignKey('activity_plans.id'), nullable=False)
     pace_id = Column(Integer, ForeignKey('paces.id'), nullable=False)
     position = Column(Integer)
     length = Column(Integer, nullable=False)
