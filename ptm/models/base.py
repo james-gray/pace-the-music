@@ -11,6 +11,9 @@ engine = create_engine('sqlite:///%s' % db['path'], echo=True)
 DBSession = scoped_session(sessionmaker(bind=engine))
 Base = declarative_base()
 
+# Global session object
+session = DBSession()
+
 class PtmBase(object):
     """
     Base mixin that can be used as a subclass in model objects. If you notice

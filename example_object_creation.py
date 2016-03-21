@@ -6,12 +6,9 @@ from ptm.models.activity import Pace
 from ptm.models.activity import Segment
 from ptm.models.music import Artist
 from ptm.models.music import Song
-from ptm.models.base import DBSession
+from ptm.models.base import session
 
 def main():
-    # Create the database session.
-    session = DBSession()
-
     # Create artists
     kanye = Artist(name='Kanye West')
     mozart = Artist(name='Wolfgang Amadeus Mozart')
