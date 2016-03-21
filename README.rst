@@ -5,7 +5,7 @@ Pace the Music
 Prerequisites
 =============
 
-Pace the Music requires Python 3.5, MySQL 5.7 and PIP v8.0.3.
+Pace the Music requires Python 2.7, SQLite 3 and PIP v8.0.3.
 
 Installing Pace the Music
 =========================
@@ -24,7 +24,7 @@ If the requirements have changed or you need to update them for some reason run 
 Setting up the app
 ==================
 
-To set up the database you will need to make sure that you have MySQL 5.7 installed.
+To set up the database you will need to make sure that you have SQLite 3 installed.
 
 Next, copy `config_template.py` to the file `config.py` and set the path to 'ptm.db'. Finally, create the DB and tables::
 

@@ -6,8 +6,24 @@ import sys
 
 import sqlalchemy
 
-from model import Base
-from model import engine
+from ptm.models.base import Base
+from ptm.models.base import engine
+
+# XXX: You'll notice that these model imports are never actually 'used', in the
+# traditional sense. Don't delete them or you're gonna have a bad time!
+#
+# SQLAlchemy has this stupid 'feature' that requires you to import the classes
+# if you define them in a different module than where you are creating them,
+# or else `Base.metadata.create_all()` won't 'see' them and as a result won't
+# create the necessary tables. I'm not entirely sure why, but to appease the
+# SQLAlchemy gods I've left these here.
+# See http://stackoverflow.com/questions/20744277/sqlalchemy-create-all-does-not-create-tables
+from ptm.models.activity import ActivityPlan
+from ptm.models.activity import Pace
+from ptm.models.activity import Segment
+from ptm.models.music import Artist
+from ptm.models.music import Song
+from ptm.models.music import SongMeta
 
 from config import db
 
