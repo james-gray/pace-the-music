@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QListWidgetItem
+from PyQt5.QtWidgets import QTableWidgetItem
 import sys
 import layout
 
@@ -8,10 +8,10 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def __init__(self, parent=None):
 		super(PaceTheMusic, self).__init__(parent)
 		self.setupUi(self)
-		self.addButton.clicked.connect(self.button_click)
+		self.addButton.clicked.connect(self.addButtonClicked)
 
 	# do this stuff when user clicks on the "Add Segment" button
- 	def button_click(self):
+ 	def addButtonClicked(self):
  		try:
 			temp = int(self.timeInput.text())
 			if(temp > 3600):
@@ -26,17 +26,27 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		time = self.timeInput.text() # Grab current text for time input box
 		pace = self.paceSelect.currentText() # Grab current text for pace input box
-		self.add_segment(time, pace)
+		self.addSegment(time, pace)
 
 
-	# adds a segment to the QListWidget
-	def add_segment(self, time, pace):
-		pos = str(self.segmentList.count()+1) # Set the position of the segment in the list
-		#print 'Length: ' + time + ' Pace: ' + pace
+	# adds a segment to the QtableWidget
+	def addSegment(self, time, pace):
+		rowPos = self.segmentTable.rowCount() # Add an empty row
+		self.segmentTable.insertRow(rowPos) 
 
-		segment = QListWidgetItem(pos + ') ' + pace + '  ' + time + '(s)')
-		self.segmentList.addItem(segment)
+		#self.segmentTable.setItem(rowPos, 0, QTableWidgetItem(str(rowPos))) # Add ID (Use default numbering scheme instead of extra column?)
+		self.segmentTable.setItem(rowPos, 0, QTableWidgetItem(pace)) # Add pace
+		self.segmentTable.setItem(rowPos, 1, QTableWidgetItem(time)) # Add time length
 
+	def mousePressEvent(self, event):
+		print 'Clicked' + str(event)
+		#self.segmentRightClicked(event)
+
+
+	def segmentRightClicked(self, event):
+		for seg in self.segmentList:
+			if event == itemClicked(seg):
+				print 'Clicked'
 
 
 # Initialize the class on startup
