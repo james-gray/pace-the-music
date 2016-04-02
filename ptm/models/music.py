@@ -136,7 +136,6 @@ class SongMeta(Base, PtmBase):
     # State
     duration = Column(Integer) # Duration in seconds
     bpm = Column(Float) # The BPM of the song
-    energy = Column(Float) # Energy of the song (float value between 0 and 1)
     song_id = Column(Integer, ForeignKey('songs.id'))
 
     # Relationships
