@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>631</width>
-    <height>361</height>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -115,7 +115,7 @@
       <x>210</x>
       <y>280</y>
       <width>201</width>
-      <height>41</height>
+      <height>61</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="buttonLayout">
@@ -126,6 +126,16 @@
        </property>
        <property name="text">
         <string>Add Segment</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="removeButton">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Remove Segment</string>
        </property>
       </widget>
      </item>

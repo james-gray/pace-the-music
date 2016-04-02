@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction
 import sys
 import layout
 
@@ -38,15 +38,17 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.segmentTable.setItem(rowPos, 0, QTableWidgetItem(pace)) # Add pace
 		self.segmentTable.setItem(rowPos, 1, QTableWidgetItem(time)) # Add time length
 
-	def mousePressEvent(self, event):
-		print 'Clicked' + str(event)
-		#self.segmentRightClicked(event)
+	# remove a row (segment) from the QtableWidget
+	def removeSegment(self, row):
+		self.segmentTable.removeRow(row)
 
-
-	def segmentRightClicked(self, event):
-		for seg in self.segmentList:
-			if event == itemClicked(seg):
-				print 'Clicked'
+	# right-click menu for QtableWidget
+	def contextMenuEvent(self, event):
+		self.menu = QMenu(self)
+		deleteAction = self.menu.addAction('Delete')
+		action = self.menu.exec_(self.mapToGlobal(event.pos()))
+		if action == deleteAction:
+			self.removeSegment(self.segmentTable.currentRow()) # remove the currently selected row
 
 
 # Initialize the class on startup
