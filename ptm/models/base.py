@@ -7,7 +7,11 @@ from sqlalchemy.types import Integer
 
 from config import db
 
-engine = create_engine('sqlite:///%s' % db['path'], echo=db['verbose'])
+engine = create_engine(
+    'sqlite:///%s' % db['path'],
+    echo=db['verbose'],
+    convert_unicode=True,
+)
 DBSession = scoped_session(sessionmaker(bind=engine))
 Base = declarative_base()
 
