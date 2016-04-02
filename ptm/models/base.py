@@ -12,6 +12,7 @@ engine = create_engine(
     echo=db['verbose'],
     convert_unicode=True,
 )
+engine.raw_connection().connection.text_factory = str
 DBSession = scoped_session(sessionmaker(bind=engine))
 Base = declarative_base()
 
