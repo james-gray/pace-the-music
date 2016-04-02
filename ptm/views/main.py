@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction
+from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox
 import sys
 import layout
 
@@ -24,31 +24,70 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			print('Invalid time input')
 			return
 
-		time = self.timeInput.text() # Grab current text for time input box
-		pace = self.paceSelect.currentText() # Grab current text for pace input box
-		self.addSegment(time, pace)
+		self.addSegment()
 
 
 	# adds a segment to the QtableWidget
-	def addSegment(self, time, pace):
-		rowPos = self.segmentTable.rowCount() # Add an empty row
-		self.segmentTable.insertRow(rowPos) 
+	def addSegment(self):
+		time = self.timeInput.text() # Grab current text for time input box
+		pace = self.copyPaceSelector() # Create a pace selector, defaulted to chosen pace
+		rowPos = self.segmentTable.rowCount()
 
-		#self.segmentTable.setItem(rowPos, 0, QTableWidgetItem(str(rowPos))) # Add ID (Use default numbering scheme instead of extra column?)
-		self.segmentTable.setItem(rowPos, 0, QTableWidgetItem(pace)) # Add pace
+		self.segmentTable.insertRow(rowPos) # Add an empty row
+		self.segmentTable.setCellWidget(rowPos, 0, pace) # Add pace
 		self.segmentTable.setItem(rowPos, 1, QTableWidgetItem(time)) # Add time length
-
-	# remove a row (segment) from the QtableWidget
-	def removeSegment(self, row):
-		self.segmentTable.removeRow(row)
 
 	# right-click menu for QtableWidget
 	def contextMenuEvent(self, event):
 		self.menu = QMenu(self)
 		deleteAction = self.menu.addAction('Delete')
+		moveUpAction = self.menu.addAction('Move up')
+		moveDownAction = self.menu.addAction('Move down')
 		action = self.menu.exec_(self.mapToGlobal(event.pos()))
+
 		if action == deleteAction:
-			self.removeSegment(self.segmentTable.currentRow()) # remove the currently selected row
+			self.segmentTable.removeRow(self.segmentTable.currentRow()) # remove the currently selected row
+		elif action == moveUpAction:
+			self.moveRowUp(self.segmentTable.currentRow())
+		elif action == moveDownAction:
+			self.moveRowDown(self.segmentTable.currentRow())
+
+	# move row up
+	def moveRowUp(self, rowPos):
+		if rowPos == 0:
+			print 'You can\'t do that'
+			return
+
+		tempPace = self.copyPaceSelector()
+		tempPace.setCurrentIndex(self.segmentTable.cellWidget(rowPos, 0).currentIndex())
+		tempTime = self.segmentTable.takeItem(rowPos, 1)
+		self.segmentTable.removeRow(rowPos)
+		self.segmentTable.insertRow(rowPos-1) # Add an empty row
+		self.segmentTable.setCellWidget(rowPos-1, 0, tempPace) # Add pace
+		self.segmentTable.setItem(rowPos-1, 1, tempTime) # Add time length
+
+	# move row down
+	def moveRowDown(self, rowPos):
+		if rowPos == self.segmentTable.rowCount()-1:
+			print 'You can\'t do that'
+			return
+
+		tempPace = self.copyPaceSelector()
+		tempPace.setCurrentIndex(self.segmentTable.cellWidget(rowPos, 0).currentIndex())
+		tempTime = self.segmentTable.takeItem(rowPos, 1)
+		self.segmentTable.removeRow(rowPos)
+		self.segmentTable.insertRow(rowPos+1) # Add an empty row
+		self.segmentTable.setCellWidget(rowPos+1, 0, tempPace) # Add pace
+		self.segmentTable.setItem(rowPos+1, 1, tempTime) # Add time length
+
+
+	# create a pace selector identical to the one used to add segments
+	def copyPaceSelector(self):
+		selector = QComboBox() # create a combo box 
+		for i in range(self.paceSelect.count()):
+			selector.addItem(self.paceSelect.itemText(i))
+		selector.setCurrentIndex(self.paceSelect.currentIndex())
+		return selector
 
 
 # Initialize the class on startup

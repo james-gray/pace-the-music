@@ -113,9 +113,9 @@
     <property name="geometry">
      <rect>
       <x>210</x>
-      <y>280</y>
+      <y>270</y>
       <width>201</width>
-      <height>61</height>
+      <height>41</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="buttonLayout">
@@ -126,16 +126,6 @@
        </property>
        <property name="text">
         <string>Add Segment</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="removeButton">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Remove Segment</string>
        </property>
       </widget>
      </item>
@@ -179,12 +169,6 @@
      </property>
     </column>
    </widget>
-   <zorder>layoutWidget</zorder>
-   <zorder>verticalLayoutWidget_2</zorder>
-   <zorder>verticalLayoutWidget</zorder>
-   <zorder>segmentTable</zorder>
-   <zorder>title</zorder>
-   <zorder>title</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
