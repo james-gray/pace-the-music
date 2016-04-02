@@ -98,43 +98,8 @@ def activity_example():
 
     # Add a segment to the beginning
     plan.insert_segment(position=0, pace=slow, length=60)
-
-    # Clean up orphaned segments
-    Segment.remove_orphans()
-
-    session.commit()
-
-    print "Plan segments: %s" % plan.segments
-
-def main():
-    # Create pace objects and add to session
-    slow, steady, fast, sprint = Pace(speed='Slow'), Pace(speed='Steady'), \
-        Pace(speed='Fast'), Pace(speed='Sprint')
-
-    session.add(slow)
-    session.add(steady)
-    session.add(fast)
-    session.add(sprint)
-
-    # Create an activity plan
-    plan = ActivityPlan(name='test')
-    session.add(plan)
     session.flush()
-
-    # Add 4 segments to the plan
-    plan.append_segment(pace=steady, length=60)
-    plan.append_segment(pace=steady, length=60)
-    plan.append_segment(pace=slow, length=10)
-    plan.append_segment(pace=sprint, length=60)
-
-    # Whoops - I made a mistake and want to delete a segment!
-    plan.delete_segment(1)
-
-    # Fix the second segment
-    plan.update_segment(position=1, pace=fast, length=60)
-
-    # Add a segment to the beginning
-    plan.insert_segment(position=0, pace=slow, length=60)
+    session.commit()
 
     # Clean up orphaned segments
     Segment.remove_orphans()
