@@ -108,6 +108,29 @@ def activity_example():
 
     print "Plan segments: %s" % plan.segments
 
+def playlist_example():
+    slow, steady, fast, sprint = Pace(speed='Slow'), Pace(speed='Steady'), \
+        Pace(speed='Fast'), Pace(speed='Sprint')
+
+    # Create an activity plan
+    plan = ActivityPlan(name='test')
+    session.add(plan)
+    session.flush()
+
+    # Add 4 segments to the plan
+    plan.append_segment(pace=steady, length=60)
+    plan.append_segment(pace=steady, length=60)
+    plan.append_segment(pace=slow, length=10)
+    plan.append_segment(pace=sprint, length=60)
+
+    # Create a playlist
+    playlist = Playlist(name='test')
+    session.add(playlist)
+    session.flush()
+
+    playlist.generate(plan)
+
 if __name__ == '__main__':
-    music_example()
-    activity_example()
+    playlist_example()
+    #music_example()
+    #activity_example()
