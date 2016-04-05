@@ -31,7 +31,8 @@ def music_example():
 
 	# Create songs
 	song2add = Song(
-	   filename='booo',
+	   filename = "booo",
+	   #filename=unicode(song[4]),
 	   title=str(song[0]),
 	   date_added=datetime.utcnow(),
 	   artist=art, # Assign the artist object directly
