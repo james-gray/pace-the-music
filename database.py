@@ -21,6 +21,7 @@ from ptm.models.base import engine
 from ptm.models.activity import ActivityPlan
 from ptm.models.activity import Pace
 from ptm.models.activity import Segment
+from ptm.models.base import session
 from ptm.models.music import Artist
 from ptm.models.music import Song
 from ptm.models.music import SongMeta
@@ -37,6 +38,11 @@ def setup_database():
     print 'Creating tables...'
     try:
         Base.metadata.create_all(engine)
+
+        # Create Pace objects
+        for pace in ['Slow', 'Steady', 'Fast', 'Sprint']:
+            session.add(Pace(speed=pace))
+        session.commit()
     except:
         raise
     else:
