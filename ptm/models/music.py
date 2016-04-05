@@ -49,6 +49,22 @@ class Playlist(Base, PtmBase):
     def __repr__(self):
         return '<Playlist(name="%s")>' % self.name
 
+    def generate(self, plan):
+        """
+        Generate a playlist of songs given a plan.
+        """
+        pass
+
+    def divide_songs_into_sets(self):
+        """
+        Divide the Songs in the database into four sets such that the bottom
+        30% of songs will be considered for 'slow' paces, the next 30% for 'steady',
+        the next 30% for 'fast' and the final 10% for 'sprint'. The sets are based
+        on the relative distribution of BPM values of songs.
+        """
+        songs = sorted(Song.query.all(), key=lambda song: song.meta.bpm)
+        # TODO
+
     def append_song(self, song):
         """
         Append song `song` to the playlist.
