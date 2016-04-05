@@ -31,7 +31,6 @@ def music_example():
 
         # Create songs
         song2add = Song(
-            #filename = "booo",
             filename=song[4].decode('utf-8'),
             title=song[0].decode('utf-8'),
             date_added=datetime.utcnow(),
