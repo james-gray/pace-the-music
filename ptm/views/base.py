@@ -1,10 +1,15 @@
 # NOTE(James): Test import to see if this works
 from ptm.models.activity import ActivityPlan
+from ptm.models.activity import Pace
+from ptm.models.base import session
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox
 import sys
 import layout
+
+# Each key represents a pace object in the DB
+paces = {'Slow':Pace.query.filter_by(speed='Slow').first(), 'Steady':Pace.query.filter_by(speed='Steady').first(), 'Fast':Pace.query.filter_by(speed='Fast').first(), 'Sprint':Pace.query.filter_by(speed='Sprint').first()}
 
 # This class deals with GUI elements, adding connections to buttons etc..
 class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
@@ -12,6 +17,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         super(PaceTheMusic, self).__init__(parent)
         self.setupUi(self)
         self.addButton.clicked.connect(self.addButtonClicked)
+        self.genButton.clicked.connect(self.genButtonClicked)
 
     # do this stuff when user clicks on the "Add Segment" button
     def addButtonClicked(self):
@@ -29,6 +35,24 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         self.addSegment()
 
+    # generate a playlist when the user clicks on the "Generate Playlist" button
+    def genButtonClicked(self):
+        try:
+            #TODO check if plan exists, if not create it
+        try:
+            plan = ActivityPlan(name='Plan')
+            for i in range(self.segmentTable.rowCount()):
+                pace = paces[self.segmentTable.cellWidget(i, 0).currentText()]
+                time = int(self.segmentTable.item(i, 1).text())
+
+                plan.append_segment(pace=pace, length=time)
+
+            session.add(plan)
+            session.commit()
+            print "Plan segments: %s" % plan.segments
+
+        except ValueError:
+            return
 
     # adds a segment to the QtableWidget
     def addSegment(self):
@@ -50,6 +74,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         if action == deleteAction:
             self.segmentTable.removeRow(self.segmentTable.currentRow()) # remove the currently selected row
+
         elif action == moveUpAction:
             self.moveRowUp(self.segmentTable.currentRow())
         elif action == moveDownAction:
