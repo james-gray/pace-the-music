@@ -53,27 +53,36 @@ class Playlist(Base, PtmBase):
         """
         Generate a playlist of songs given a plan.
         """
-        pass
+        slow_set, steady_set, fast_set, sprint_set = self.divide_songs_into_sets()
+        segments = list(plan.segments)
+        curr_seg = segments.pop(0)
+        # TODO!
 
     def divide_songs_into_sets(self):
         """
         Divide the Songs in the database into four sets such that the
-	bottom 30% of songs will be considered for 'slow' paces, the
-	next 30% for 'steady', the next 30% for 'fast' and the final
-	10% for 'sprint'. The sets are based on the relative
-	distribution of BPM values of songs.
+        bottom 30% of songs will be considered for 'slow' paces, the
+        next 30% for 'steady', the next 30% for 'fast' and the final
+        10% for 'sprint'. The sets are based on the relative
+        distribution of BPM values of songs.
         """
         songs = sorted(Song.query.all(), key=lambda song: song.meta.bpm)
-	lim = int((len(songs)*3)/10)
-	# Slow
-	slow_songs = songs[:lim]
-	# Steady
-	steady_songs = songs[lim+1:lim*2]
-	# Fast
-	fast_songs = songs[lim*2+1:lim*3]
-	# Sprint
-	sprint_songs = songs[lim*3:]
-	return slow_songs, steady_songs, fast_songs, sprint_songs
+
+        lim = int((len(songs)*3)/10)
+        # Slow
+        slow_songs = songs[:lim]
+        # Steady
+        steady_songs = songs[lim+1:lim*2]
+        # Fast
+        fast_songs = songs[(lim*2)+1:lim*3]
+        # Sprint
+        sprint_songs = songs[(lim*3)+1:]
+
+        # Sort the subsets by song length
+        return [
+            sorted(subset, key=lambda song: song.meta.duration)
+            for subset in (slow_songs, steady_songs, fast_songs, sprint_songs)
+        ]
 
     def append_song(self, song):
         """
