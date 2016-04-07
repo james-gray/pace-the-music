@@ -75,7 +75,13 @@ class Playlist(Base, PtmBase):
         remaining_segments = len(segments)
 
         remaining_time = segments[0].length
+        skips = 0
         for seg in segments:
+            if skips > 0:
+                # Skip this segment if a song overlaps it completely
+                skips -= 1
+                continue
+
             print "NEW SEGMENT: %s" % seg
             remaining_segments -= 1
             pace = seg.pace.speed
@@ -149,7 +155,22 @@ class Playlist(Base, PtmBase):
                 # Calculate the overlap between the last song of this segment
                 # and the next segment
                 overlap = (song.meta.duration - remaining_time)
-                remaining_time = segments[seg.position + 1].length - overlap
+                next_seg_position = seg.position + 1
+                remaining_time = segments[next_seg_position].length - overlap
+                while remaining_time <= 0:
+                    # If the song completely overlaps the next segment, skip it
+                    # and consider the segment after that, until we no longer
+                    # completely overlap any segments.
+                    print "SKIPPING %s" % segments[next_seg_position]
+                    skips += 1
+                    remaining_segments -= 1
+                    if remaining_segments == 0:
+                        # We have already overlapped the last segment, so no more
+                        # songs are needed
+                        return
+                    next_seg_position += 1
+                    overlap = abs(remaining_time)
+                    remaining_time = segments[next_seg_position].length - overlap
 
     def divide_songs_into_sets(self):
         """
