@@ -1,3 +1,5 @@
+import random
+
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy.ext.orderinglist import ordering_list
@@ -54,9 +56,100 @@ class Playlist(Base, PtmBase):
         Generate a playlist of songs given a plan.
         """
         slow_set, steady_set, fast_set, sprint_set = self.divide_songs_into_sets()
+        # Enumeration for comparing paces with respect to speed (i.e. Slow is
+        # 'less than' Steady)
+        pace_enum = {
+            'Slow': 1,
+            'Steady': 2,
+            'Fast': 3,
+            'Sprint': 4,
+        }
+        # Add sets to a dict to easily access by hash
+        sets = {
+            'Slow': slow_set,
+            'Steady': steady_set,
+            'Fast': fast_set,
+            'Sprint': sprint_set,
+        }
         segments = list(plan.segments)
-        curr_seg = segments.pop(0)
-        # TODO!
+        remaining_segments = len(segments)
+
+        remaining_time = segments[0].length
+        for seg in segments:
+            print "NEW SEGMENT: %s" % seg
+            remaining_segments -= 1
+            pace = seg.pace.speed
+            # Pick subset of songs that can fit in the time remaining
+            subset = [
+                song
+                for song in sets[pace]
+                if song.meta.duration <= remaining_time
+            ]
+
+            while subset:
+                # Pick a random song
+                song = random.choice(subset)
+
+                # Add the song to our playlist
+                print "    Adding song from subset: %s" % song
+                self.append_song(song)
+
+                # Remove the song from relevant sets
+                subset.remove(song)
+                sets[pace].remove(song)
+
+                # Recalculate time remaining
+                remaining_time -= song.meta.duration
+
+                # Remove any songs that are greater than the remaining time
+                subset = [
+                    song
+                    for song in subset
+                    if song.meta.duration <= remaining_time
+                ]
+
+            print "    Cannot fit any more whole songs in this segment."
+
+            # At this point the segment cannot fit any more segments without
+            # overlapping with the next segment.
+            if remaining_time == 0:
+                # Just go to the next seg - set remaining_time to that segment's
+                # duration
+                remaining_time = segments[seg.position + 1].length
+                print "        Moving to next segment"
+            elif remaining_segments == 0:
+                # Our run is almost done - pick a random song at the current
+                # segment pace
+                song = random.choice(sets[pace])
+                self.append_song(song)
+                sets[pace].remove(song)
+                print "        THIS IS THE LAST SEGMENT. Adding random song"
+            else:
+                next_seg = segments[seg.position + 1]
+                if pace_enum[next_seg.pace.speed] > pace_enum[seg.pace.speed] \
+                        and sets[pace][0].meta.duration / 2 > remaining_time:
+                    # The next segment is at a faster pace.
+                    # Here we choose a song from the current segment's set iff
+                    # 50% or more of the song will take place in the current
+                    # segment.
+                    next_pace = next_seg.pace.speed
+                    song = sets[next_pace][0]
+                    self.append_song(song)
+                    sets[next_pace].remove(song)
+                    print "        Next segment is faster, add song from next pace."
+                else:
+                    # Pick the shortest song from the current pace's set, so we
+                    # minimize the amount of time the song cuts into the next
+                    # segment
+                    song = sets[pace][0]
+                    self.append_song(song)
+                    sets[pace].remove(song)
+                    print "        Add song from curr pace."
+
+                # Calculate the overlap between the last song of this segment
+                # and the next segment
+                overlap = (song.meta.duration - remaining_time)
+                remaining_time = segments[seg.position + 1].length - overlap
 
     def divide_songs_into_sets(self):
         """
