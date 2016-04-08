@@ -63,7 +63,15 @@ def removeSegment(plan_id, seg_pos):
     plan.delete_segment(seg_pos)
     session.commit()
 
-'''def updateSegTime(plan_id, seg_pos, time):
+# update the lenth of a segment in the database
+def updateSegTime(plan_id, seg_pos, time):
     plan = getPlan(plan_id)
-    plan.update_segment(seg_pos, time=time)
-    session.commit()'''
+    plan.update_segment(position=seg_pos, length=time)
+    session.commit()
+
+# update the pace of a segment in the database
+def updateSegPace(plan_id, seg_pos, pace):
+    plan = getPlan(plan_id)
+    pace = paces[pace]
+    plan.update_segment(position=seg_pos, pace=pace)
+    session.commit()

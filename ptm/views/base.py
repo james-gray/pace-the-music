@@ -11,8 +11,8 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.setupUi(self)
         self.displaySegments() # initialize segments from database
         self.addButton.clicked.connect(self.addButtonClicked)
-        self.genButton.clicked.connect(self.genButtonClicked)
-        '''self.segmentTable.itemChanged.connect(self.segmentTimeChanged)'''
+        #self.genButton.clicked.connect(self.genButtonClicked)
+        self.segmentTable.itemChanged.connect(self.segmentTimeChanged)
 
     # display segments that are in the database NOTE: ONLY USE UPON STARTUP
     def displaySegments(self):
@@ -20,7 +20,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         for i in range(len(segmentList)):
             print 'time = ', str(segmentList[i].length)
             print 'pace = ', segmentList[i].pace_id
-            self.addSegment(str(segmentList[i].length), segmentList[i].pace_id)
+            self.addSegment(str(segmentList[i].length), segmentList[i].pace_id, False)
 
     # do this stuff when user clicks on the "Add Segment" button
     def addButtonClicked(self):
@@ -39,29 +39,40 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.addSegment()
 
     # generate a playlist when the user clicks on the "Generate Playlist" button
-    def genButtonClicked(self):
+    '''def genButtonClicked(self):
+        TODO: generate playlist
+
         for i in range(self.segmentTable.rowCount()):
             pace = self.segmentTable.cellWidget(i, 0).currentText()
             time = int(self.segmentTable.item(i, 1).text())
-            db.addSegment(1, pace, time)
+            db.addSegment(1, pace, time)'''
 
-    # adds a segment to the QtableWidget
-    def addSegment(self, time=None, pace=None):
+    # adds a segment to the QtableWidget, if addToDB is true it also adds the segment to the database
+    def addSegment(self, time=None, pace=None, addToDB=True):
         if(time == None):
             time = self.timeInput.text() # Grab current text for time input box
-        #pace = self.copyPaceSelector() # Create a pace selector, defaulted current pace
-        pace = self.copyPaceSelector(pace)
+        pace = self.createPaceSelector(pace) # Create a pace selector, defaulted to 'pace'
         rowPos = self.segmentTable.rowCount()
 
         self.segmentTable.insertRow(rowPos) # Add an empty row
         self.segmentTable.setCellWidget(rowPos, 0, pace) # Add pace
         self.segmentTable.setItem(rowPos, 1, QTableWidgetItem(time)) # Add time length
 
-    '''# update the database when a user 
+        pace = self.segmentTable.cellWidget(rowPos, 0).currentText()
+        if(addToDB):
+            db.addSegment(1, pace, time) # Add the segment to the database
+
+    # update the database when a user edits the length of a segment
     def segmentTimeChanged(self, event):
         rowPos = self.segmentTable.currentRow()
         time = int(self.segmentTable.item(rowPos, 1).text())
-        db.updateSegTime(1, rowPos, time)'''
+        db.updateSegTime(1, rowPos, time)
+
+    # update the database when a user edits the pace of a segment
+    def segmentPaceChanged(self, event):
+        rowPos = self.segmentTable.currentRow()
+        pace = self.segmentTable.cellWidget(rowPos, 0).currentText()
+        db.updateSegPace(1, rowPos, pace)
 
 
     # right-click menu for QtableWidget
@@ -86,7 +97,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             print 'You can\'t do that'
             return
 
-        tempPace = self.copyPaceSelector()
+        tempPace = self.createPaceSelector()
         tempPace.setCurrentIndex(self.segmentTable.cellWidget(rowPos, 0).currentIndex())
         tempTime = self.segmentTable.takeItem(rowPos, 1)
         self.segmentTable.removeRow(rowPos)
@@ -100,7 +111,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             print 'You can\'t do that'
             return
 
-        tempPace = self.copyPaceSelector()
+        tempPace = self.createPaceSelector()
         tempPace.setCurrentIndex(self.segmentTable.cellWidget(rowPos, 0).currentIndex())
         tempTime = self.segmentTable.takeItem(rowPos, 1)
         self.segmentTable.removeRow(rowPos)
@@ -110,14 +121,17 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
     # create a pace selector identical to the one used to add segments
-    def copyPaceSelector(self, pace_id):
+    def createPaceSelector(self, pace_id):
         selector = QComboBox() # create a combo box
+
         for i in range(self.paceSelect.count()):
             selector.addItem(self.paceSelect.itemText(i))
         if pace_id == None:
             selector.setCurrentIndex(self.paceSelect.currentIndex())
         else:
             selector.setCurrentIndex(pace_id-1) # subtract 1 because comboboxes are indexed starting at 0
+
+        selector.currentIndexChanged.connect(self.segmentPaceChanged) # connect to the function that deals with adding the change to the database
         return selector
 
 '''
