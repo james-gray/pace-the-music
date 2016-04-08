@@ -1,19 +1,26 @@
 # NOTE(James): Test import to see if this works
-from db import DatabaseFunctions
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox
-import sys
-import layout
+import sys, layout, db
 
-db = DatabaseFunctions()
+#db = DatabaseFunctions()
 # This class deals with GUI elements, adding connections to buttons etc..
 class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     def __init__(self, parent=None):
         super(PaceTheMusic, self).__init__(parent)
         self.setupUi(self)
+        self.displaySegments() # initialize segments from database
         self.addButton.clicked.connect(self.addButtonClicked)
         self.genButton.clicked.connect(self.genButtonClicked)
+        '''self.segmentTable.itemChanged.connect(self.segmentTimeChanged)'''
+
+    # display segments that are in the database NOTE: ONLY USE UPON STARTUP
+    def displaySegments(self):
+        segmentList = db.listSegments(1)
+        for i in range(len(segmentList)):
+            print 'time = ', str(segmentList[i].length)
+            print 'pace = ', segmentList[i].pace_id
+            self.addSegment(str(segmentList[i].length), segmentList[i].pace_id)
 
     # do this stuff when user clicks on the "Add Segment" button
     def addButtonClicked(self):
@@ -33,23 +40,29 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
     # generate a playlist when the user clicks on the "Generate Playlist" button
     def genButtonClicked(self):
-        plan = db.getPlan()
-        playlist = db.getPlaylist()
-
         for i in range(self.segmentTable.rowCount()):
             pace = self.segmentTable.cellWidget(i, 0).currentText()
             time = int(self.segmentTable.item(i, 1).text())
-            db.addSegment(plan, pace, time)
+            db.addSegment(1, pace, time)
 
     # adds a segment to the QtableWidget
-    def addSegment(self):
-        time = self.timeInput.text() # Grab current text for time input box
-        pace = self.copyPaceSelector() # Create a pace selector, defaulted to chosen pace
+    def addSegment(self, time=None, pace=None):
+        if(time == None):
+            time = self.timeInput.text() # Grab current text for time input box
+        #pace = self.copyPaceSelector() # Create a pace selector, defaulted current pace
+        pace = self.copyPaceSelector(pace)
         rowPos = self.segmentTable.rowCount()
 
         self.segmentTable.insertRow(rowPos) # Add an empty row
         self.segmentTable.setCellWidget(rowPos, 0, pace) # Add pace
         self.segmentTable.setItem(rowPos, 1, QTableWidgetItem(time)) # Add time length
+
+    '''# update the database when a user 
+    def segmentTimeChanged(self, event):
+        rowPos = self.segmentTable.currentRow()
+        time = int(self.segmentTable.item(rowPos, 1).text())
+        db.updateSegTime(1, rowPos, time)'''
+
 
     # right-click menu for QtableWidget
     def contextMenuEvent(self, event):
@@ -60,8 +73,8 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         action = self.menu.exec_(self.mapToGlobal(event.pos()))
 
         if action == deleteAction:
+            db.removeSegment(1, self.segmentTable.currentRow()) # remove the segment from the database
             self.segmentTable.removeRow(self.segmentTable.currentRow()) # remove the currently selected row
-
         elif action == moveUpAction:
             self.moveRowUp(self.segmentTable.currentRow())
         elif action == moveDownAction:
@@ -97,11 +110,14 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
     # create a pace selector identical to the one used to add segments
-    def copyPaceSelector(self):
+    def copyPaceSelector(self, pace_id):
         selector = QComboBox() # create a combo box
         for i in range(self.paceSelect.count()):
             selector.addItem(self.paceSelect.itemText(i))
-        selector.setCurrentIndex(self.paceSelect.currentIndex())
+        if pace_id == None:
+            selector.setCurrentIndex(self.paceSelect.currentIndex())
+        else:
+            selector.setCurrentIndex(pace_id-1) # subtract 1 because comboboxes are indexed starting at 0
         return selector
 
 '''
