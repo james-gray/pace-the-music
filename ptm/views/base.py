@@ -11,7 +11,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.setupUi(self)
         self.displaySegments() # initialize segments from database
         self.addButton.clicked.connect(self.addButtonClicked)
-        #self.genButton.clicked.connect(self.genButtonClicked)
+        self.genButton.clicked.connect(self.genButtonClicked)
         self.segmentTable.itemChanged.connect(self.segmentTimeChanged)
 
     # display segments that are in the database NOTE: ONLY USE UPON STARTUP
@@ -39,13 +39,15 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.addSegment()
 
     # generate a playlist when the user clicks on the "Generate Playlist" button
-    '''def genButtonClicked(self):
-        TODO: generate playlist
+    def genButtonClicked(self):
+        if self.segmentTable.rowCount() == 0:
+            print 'You need to have segments to do that!'
+            return
 
-        for i in range(self.segmentTable.rowCount()):
-            pace = self.segmentTable.cellWidget(i, 0).currentText()
-            time = int(self.segmentTable.item(i, 1).text())
-            db.addSegment(1, pace, time)'''
+        print 'Grabbing playlist'
+        playList = db.getPlayList()
+
+        
 
     # adds a segment to the QtableWidget, if addToDB is true it also adds the segment to the database
     def addSegment(self, time=None, pace=None, addToDB=True):
@@ -65,6 +67,9 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     # update the database when a user edits the length of a segment
     def segmentTimeChanged(self, event):
         rowPos = self.segmentTable.currentRow()
+        print 'RowPos = ', rowPos
+        if(rowPos==-1): # make sure the user has actually selected a row
+            return
         time = int(self.segmentTable.item(rowPos, 1).text())
         db.updateSegTime(1, rowPos, time)
 

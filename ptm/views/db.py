@@ -27,15 +27,15 @@ def getPlan(pid):
     return plan[0]
 
 # Get the playlist from the DB, create it if it doesn't exist
-def getPlaylist(plid):
+def getPlaylist(pl_id):
     # Check if Playlist exists, create one if it doesn't
-    pl = session.query(Playlist).filter(Playlist.id == plid)
+    pl = session.query(Playlist).filter(Playlist.id == pl_id)
     if pl.count()==0:
         print '\n\nNo Activity Playlist exists, creating new Playlist\n\n'
         pl = Playlist(name='Playlist')
         session.add(pl)
         session.commit()
-        pl = session.query(Playlist).filter(Playlist.id == plid)
+        pl = session.query(Playlist).filter(Playlist.id == pl_id)
 
     return pl[0] 
 
