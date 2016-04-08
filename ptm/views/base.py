@@ -45,9 +45,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             return
 
         print 'Grabbing playlist'
-        playList = db.getPlayList()
-
-        
+        db.generatePlayList(1, 1)
 
     # adds a segment to the QtableWidget, if addToDB is true it also adds the segment to the database
     def addSegment(self, time=None, pace=None, addToDB=True):
@@ -76,6 +74,9 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     # update the database when a user edits the pace of a segment
     def segmentPaceChanged(self, event):
         rowPos = self.segmentTable.currentRow()
+        print 'RowPos = ', rowPos
+        if(rowPos==-1): # make sure the user has actually selected a row
+            return
         pace = self.segmentTable.cellWidget(rowPos, 0).currentText()
         db.updateSegPace(1, rowPos, pace)
 
@@ -126,7 +127,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
     # create a pace selector identical to the one used to add segments
-    def createPaceSelector(self, pace_id):
+    def createPaceSelector(self, pace_id=None):
         selector = QComboBox() # create a combo box
 
         for i in range(self.paceSelect.count()):

@@ -1,6 +1,7 @@
 # This module is used to interact with the database
 
 from ptm.models.music import Playlist
+from ptm.models.music import Song
 from ptm.models.activity import ActivityPlan
 from ptm.models.activity import Pace
 from ptm.models.activity import Segment
@@ -27,7 +28,7 @@ def getPlan(pid):
     return plan[0]
 
 # Get the playlist from the DB, create it if it doesn't exist
-def getPlaylist(pl_id):
+def getPlayList(pl_id):
     # Check if Playlist exists, create one if it doesn't
     pl = session.query(Playlist).filter(Playlist.id == pl_id)
     if pl.count()==0:
@@ -39,10 +40,22 @@ def getPlaylist(pl_id):
 
     return pl[0] 
 
+# this is where the magic happens
+def generatePlayList(pl_id, plan_id):
+    song = session.query(Song)
+    if(song.count()==0): # make sure there are songs in the database
+        print '\n\nNo songs available\n\n'
+        #TODO: possibly add the songs?
+        return
+
+    playList = getPlayList(pl_id)
+    plan = getPlan(plan_id)
+    playList.generate(plan)
+
+
 # returns a list of the segments contained in the plan with id == pid
 def listSegments(pid):
     sList = []
-    plan = session.query(ActivityPlan).filter(ActivityPlan.id == pid)
     segments = session.query(Segment).filter(Segment.plan_id == pid)
     for i in range(segments.count()):
         if(segments[i].plan_id == pid):
