@@ -1,4 +1,3 @@
-# NOTE(James): Test import to see if this works
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox
 import sys, layout, db
@@ -45,7 +44,10 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             return
 
         print 'Grabbing playlist'
-        db.generatePlayList(1, 1)
+        db.generatePlayList(
+            playlist_id=1,
+            plan_id=1,
+        )
 
     # adds a segment to the QtableWidget, if addToDB is true it also adds the segment to the database
     def addSegment(self, time=None, pace=None, addToDB=True):

@@ -8,67 +8,72 @@ from ptm.models.activity import Segment
 from ptm.models.base import session
 
 # Each key represents a pace object in the DB
-paces = {'Slow':Pace.query.filter_by(speed='Slow').first(), 'Steady':Pace.query.filter_by(speed='Steady').first(), 'Fast':Pace.query.filter_by(speed='Fast').first(), 'Sprint':Pace.query.filter_by(speed='Sprint').first()}
+paces = {
+    'Slow': Pace.query.filter_by(speed='Slow').first(),
+    'Steady': Pace.query.filter_by(speed='Steady').first(),
+    'Fast': Pace.query.filter_by(speed='Fast').first(),
+    'Sprint': Pace.query.filter_by(speed='Sprint').first(),
+}
 
 
-def getPace(pid):
-    pace = session.query(Pace).filter(Pace.id == pid)
+def getPace(pace_id):
+    pace = session.query(Pace).filter(Pace.id == pace_id)
     return pace[0].speed
 
 # Get the activity plan from the DB, create it if it doesn't exist
-def getPlan(pid):
-    plan = session.query(ActivityPlan).filter(ActivityPlan.id == pid)
+def getPlan(plan_id):
+    plan = session.query(ActivityPlan).filter(ActivityPlan.id == plan_id)
     if plan.count()==0:
-        print '\n\nNo Activity Plan exists, creating new plan\n\n'
+        print '\nNo Activity Plan exists, creating new plan\n'
         plan = ActivityPlan(name='Plan')
         session.add(plan)
         session.commit()
-        plan = session.query(ActivityPlan).filter(ActivityPlan.id == pid)
+        plan = session.query(ActivityPlan).filter(ActivityPlan.id == plan_id)
 
     return plan[0]
 
 # Get the playlist from the DB, create it if it doesn't exist
-def getPlayList(pl_id):
+def getPlayList(playlist_id):
     # Check if Playlist exists, create one if it doesn't
-    pl = session.query(Playlist).filter(Playlist.id == pl_id)
-    if pl.count()==0:
-        print '\n\nNo Activity Playlist exists, creating new Playlist\n\n'
-        pl = Playlist(name='Playlist')
-        session.add(pl)
+    playlist = session.query(Playlist).filter(Playlist.id == playlist_id)
+    if playlist.count()==0:
+        print '\nNo Activity Playlist exists, creating new Playlist\n'
+        playlist = Playlist(name='Playlist')
+        session.add(playlist)
         session.commit()
-        pl = session.query(Playlist).filter(Playlist.id == pl_id)
+        playlist = session.query(Playlist).filter(Playlist.id == playlist_id)
 
-    return pl[0] 
+    return playlist[0]
 
 # this is where the magic happens
-def generatePlayList(pl_id, plan_id):
+def generatePlayList(playlist_id, plan_id):
     song = session.query(Song)
     if(song.count()==0): # make sure there are songs in the database
-        print '\n\nNo songs available\n\n'
+        print '\nNo songs available\n'
         #TODO: possibly add the songs?
         return
 
-    playList = getPlayList(pl_id)
+    playList = getPlayList(playlist_id)
     plan = getPlan(plan_id)
     playList.generate(plan)
 
 
-# returns a list of the segments contained in the plan with id == pid
-def listSegments(pid):
-    sList = []
-    segments = session.query(Segment).filter(Segment.plan_id == pid)
+# returns a list of the segments contained in the plan with id == plan_id
+def listSegments(plan_id):
+    segment_list = []
+    segments = session.query(Segment).filter(Segment.plan_id == plan_id)
     for i in range(segments.count()):
-        if(segments[i].plan_id == pid):
-            sList.append(segments[i])
-    return sList
+        if(segments[i].plan_id == plan_id):
+            segment_list.append(segments[i])
+    return segment_list
 
 # Add segments to activity plan
-def addSegment(pid, pace, time):
-    plan = getPlan(pid)
+def addSegment(plan_id, pace, time):
+    plan = getPlan(plan_id)
     pace = paces[pace]
     plan.append_segment(pace=pace, length=time)
     session.commit()
-    print "\n\nPlan segments: %s\n\n" % plan.segments
+    print "\nPlan segments: %s\n" % plan.segments
 
 # remove segment at specified position
 def removeSegment(plan_id, seg_pos):

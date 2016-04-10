@@ -1,9 +1,10 @@
-from PyQt5 import QtWidgets
 import sys
-from ptm.views.base import PaceTheMusic
-import qdarkstyle
 
-# Initialize the class on startup
+import qdarkstyle
+from PyQt5 import QtWidgets
+
+from ptm.views.base import PaceTheMusic
+
 def main():
     app = QtWidgets.QApplication(sys.argv) # new instance of QApplication
     form = PaceTheMusic() # set form to represent the application
