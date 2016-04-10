@@ -20,52 +20,54 @@ def getPace(pace_id):
     pace = session.query(Pace).filter(Pace.id == pace_id)
     return pace[0].speed
 
+
 # Get the activity plan from the DB, create it if it doesn't exist
 def getPlan(plan_id):
-    plan = session.query(ActivityPlan).filter(ActivityPlan.id == plan_id)
-    if plan.count()==0:
+    plan = ActivityPlan.query.filter(ActivityPlan.id == plan_id).first()
+    if not plan:
         print '\nNo Activity Plan exists, creating new plan\n'
         plan = ActivityPlan(name='Plan')
         session.add(plan)
         session.commit()
-        plan = session.query(ActivityPlan).filter(ActivityPlan.id == plan_id)
 
-    return plan[0]
+    return plan
+
 
 # Get the playlist from the DB, create it if it doesn't exist
 def getPlayList(playlist_id):
     # Check if Playlist exists, create one if it doesn't
-    playlist = session.query(Playlist).filter(Playlist.id == playlist_id)
-    if playlist.count()==0:
+    playlist = Playlist.query.filter(Playlist.id == playlist_id).first()
+    if not playlist:
         print '\nNo Activity Playlist exists, creating new Playlist\n'
         playlist = Playlist(name='Playlist')
         session.add(playlist)
         session.commit()
-        playlist = session.query(Playlist).filter(Playlist.id == playlist_id)
 
-    return playlist[0]
+    return playlist
+
 
 # this is where the magic happens
 def generatePlayList(playlist_id, plan_id):
-    song = session.query(Song)
-    if(song.count()==0): # make sure there are songs in the database
+    songs = Song.query.all()
+    if not songs: # make sure there are songs in the database
         print '\nNo songs available\n'
         #TODO: possibly add the songs?
         return
 
-    playList = getPlayList(playlist_id)
+    playlist = getPlayList(playlist_id)
     plan = getPlan(plan_id)
-    playList.generate(plan)
+    playlist.generate(plan)
 
 
 # returns a list of the segments contained in the plan with id == plan_id
 def listSegments(plan_id):
     segment_list = []
-    segments = session.query(Segment).filter(Segment.plan_id == plan_id)
+    segments = Segment.query.filter(Segment.plan_id == plan_id)
     for i in range(segments.count()):
         if(segments[i].plan_id == plan_id):
             segment_list.append(segments[i])
     return segment_list
+
 
 # Add segments to activity plan
 def addSegment(plan_id, pace, time):
@@ -75,17 +77,20 @@ def addSegment(plan_id, pace, time):
     session.commit()
     print "\nPlan segments: %s\n" % plan.segments
 
+
 # remove segment at specified position
 def removeSegment(plan_id, seg_pos):
     plan = getPlan(plan_id)
     plan.delete_segment(seg_pos)
     session.commit()
 
+
 # update the lenth of a segment in the database
 def updateSegTime(plan_id, seg_pos, time):
     plan = getPlan(plan_id)
     plan.update_segment(position=seg_pos, length=time)
     session.commit()
+
 
 # update the pace of a segment in the database
 def updateSegPace(plan_id, seg_pos, pace):
