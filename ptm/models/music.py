@@ -51,6 +51,32 @@ class Playlist(Base, PtmBase):
     def __repr__(self):
         return '<Playlist(name="%s")>' % self.name
 
+    def divide_songs_into_sets(self):
+        """
+        Divide the Songs in the database into four sets such that the
+        bottom 30% of songs will be considered for 'slow' paces, the
+        next 30% for 'steady', the next 30% for 'fast' and the final
+        10% for 'sprint'. The sets are based on the relative
+        distribution of BPM values of songs.
+        """
+        songs = sorted(Song.query.all(), key=lambda song: song.meta.bpm)
+
+        lim = int((len(songs)*3)/10)
+        # Slow
+        slow_songs = songs[:lim]
+        # Steady
+        steady_songs = songs[lim+1:lim*2]
+        # Fast
+        fast_songs = songs[(lim*2)+1:lim*3]
+        # Sprint
+        sprint_songs = songs[(lim*3)+1:]
+
+        # Sort the subsets by song length
+        return [
+            sorted(subset, key=lambda song: song.meta.duration)
+            for subset in (slow_songs, steady_songs, fast_songs, sprint_songs)
+        ]
+
     def generate(self, plan):
         """
         Generate a playlist of songs given a plan.
@@ -71,11 +97,12 @@ class Playlist(Base, PtmBase):
             'Fast': fast_set,
             'Sprint': sprint_set,
         }
+
         segments = list(plan.segments)
         remaining_segments = len(segments)
-
         remaining_time = segments[0].length
         skips = 0
+
         for seg in segments:
             if skips > 0:
                 # Skip this segment if a song overlaps it completely
@@ -171,32 +198,6 @@ class Playlist(Base, PtmBase):
                     next_seg_position += 1
                     overlap = abs(remaining_time)
                     remaining_time = segments[next_seg_position].length - overlap
-
-    def divide_songs_into_sets(self):
-        """
-        Divide the Songs in the database into four sets such that the
-        bottom 30% of songs will be considered for 'slow' paces, the
-        next 30% for 'steady', the next 30% for 'fast' and the final
-        10% for 'sprint'. The sets are based on the relative
-        distribution of BPM values of songs.
-        """
-        songs = sorted(Song.query.all(), key=lambda song: song.meta.bpm)
-
-        lim = int((len(songs)*3)/10)
-        # Slow
-        slow_songs = songs[:lim]
-        # Steady
-        steady_songs = songs[lim+1:lim*2]
-        # Fast
-        fast_songs = songs[(lim*2)+1:lim*3]
-        # Sprint
-        sprint_songs = songs[(lim*3)+1:]
-
-        # Sort the subsets by song length
-        return [
-            sorted(subset, key=lambda song: song.meta.duration)
-            for subset in (slow_songs, steady_songs, fast_songs, sprint_songs)
-        ]
 
     def append_song(self, song):
         """
