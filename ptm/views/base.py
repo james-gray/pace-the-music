@@ -1,8 +1,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox
+from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox, QMessageBox
 import sys, layout, db
 
 #db = DatabaseFunctions()
+
+
 # This class deals with GUI elements, adding connections to buttons etc..
 class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -23,15 +25,22 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
     # do this stuff when user clicks on the "Add Segment" button
     def addButtonClicked(self):
+        msgBox = QMessageBox()
         try:
             temp = int(self.timeInput.text())
             if(temp > 3600):
                 print 'Length of a segment cannot exceed 3600 seconds!'
+                msgBox.setText('Length of a segment cannot exceed 3600 seconds!')
+                msgBox.exec_()
                 return
             elif(temp <= 5):
                 print  'Length of a segment has to be greater than 5 seconds!'
+                msgBox.setText('Length of a segment has to be greater than 5 seconds!')
+                msgBox.exec_()
                 return
         except ValueError:
+            msgBox.setText('Invalid time input')
+            msgBox.exec_()
             print('Invalid time input')
             return
 
