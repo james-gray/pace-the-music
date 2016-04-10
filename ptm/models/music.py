@@ -4,6 +4,7 @@ from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.types import DateTime
 from sqlalchemy.types import Float
 from sqlalchemy.types import Integer
@@ -25,6 +26,10 @@ class Artist(Base, PtmBase):
 
     # Relationships
     songs = relationship('Song', back_populates='artist')
+
+    __table_args__ = (
+        UniqueConstraint('name', name='artist_name'),
+    )
 
     # Behaviour
     def __repr__(self):
