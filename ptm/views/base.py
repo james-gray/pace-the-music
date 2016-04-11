@@ -2,9 +2,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox, QMessageBox
 import sys, os, layout, db
 
-#db = DatabaseFunctions()
-
-
 # This class deals with GUI elements, adding connections to buttons etc..
 class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -79,7 +76,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         pace = self.segmentTable.cellWidget(rowPos, 0).currentText()
         if(addToDB):
-            db.addSegment(1, pace, time) # Add the segment to the database
+            db.addSegment(plan_id=1, pace=pace, time=time) # Add the segment to the database
 
         #TODO: create playlist file and add it to folder
 
@@ -90,7 +87,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         if(rowPos==-1): # make sure the user has actually selected a row
             return
         time = int(self.segmentTable.item(rowPos, 1).text())
-        db.updateSegTime(1, rowPos, time)
+        db.updateSegTime(plan_id=1, seg_pos=rowPos, time=time)
 
     # update the database when a user edits the pace of a segment
     def segmentPaceChanged(self, event):
@@ -99,7 +96,7 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         if(rowPos==-1): # make sure the user has actually selected a row
             return
         pace = self.segmentTable.cellWidget(rowPos, 0).currentText()
-        db.updateSegPace(1, rowPos, pace)
+        db.updateSegPace(plan_id=1, seg_pos=rowPos, pace=pace)
 
 
     # right-click menu for QtableWidget
@@ -132,6 +129,9 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.segmentTable.setCellWidget(rowPos-1, 0, tempPace) # Add pace
         self.segmentTable.setItem(rowPos-1, 1, tempTime) # Add time length
 
+        db.removeSegment(plan_id=1, seg_pos=rowPos) # Repeat above steps in the database
+        db.insertSegment(plan_id=1, seg_pos=rowPos-1, pace=tempPace.currentText(), time=int(tempTime.text()))
+
     # move row down
     def moveRowDown(self, rowPos):
         if rowPos == self.segmentTable.rowCount()-1:
@@ -145,6 +145,9 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.segmentTable.insertRow(rowPos+1) # Add an empty row
         self.segmentTable.setCellWidget(rowPos+1, 0, tempPace) # Add pace
         self.segmentTable.setItem(rowPos+1, 1, tempTime) # Add time length
+
+        db.removeSegment(plan_id=1, seg_pos=rowPos) # Repeat above steps in the database
+        db.insertSegment(plan_id=1, seg_pos=rowPos+1, pace=tempPace.currentText(), time=int(tempTime.text()))
 
 
     # create a pace selector identical to the one used to add segments

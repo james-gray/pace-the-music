@@ -60,13 +60,11 @@ def generatePlayList(playlist_id, plan_id):
     session.commit()
 
 
-# returns a list of the segments contained in the plan with id == plan_id
+# returns a list of the segments contained in the plan
 def listSegments(plan_id):
-    segment_list = []
-    segments = Segment.query.filter(Segment.plan_id == plan_id)
-    for i in range(segments.count()):
-        if(segments[i].plan_id == plan_id):
-            segment_list.append(segments[i])
+    plan = getPlan(plan_id)
+    segment_list = plan.segments
+
     return segment_list
 
 
@@ -76,7 +74,12 @@ def addSegment(plan_id, pace, time):
     pace = paces[pace]
     plan.append_segment(pace=pace, length=time)
     session.commit()
-    print "\nPlan segments: %s\n" % plan.segments
+
+def insertSegment(plan_id, seg_pos, pace, time):
+    plan = getPlan(plan_id)
+    pace = paces[pace]
+    plan.insert_segment(position=seg_pos, pace=pace, length=time)
+    session.commit()
 
 
 # remove segment at specified position
