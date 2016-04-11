@@ -34,12 +34,12 @@ def getPlan(plan_id):
 
 
 # Get the playlist from the DB, create it if it doesn't exist
-def getPlayList(playlist_id):
+def getPlayList(playlist_name):
     # Check if Playlist exists, create one if it doesn't
-    playlist = Playlist.query.filter(Playlist.id == playlist_id).first()
+    playlist = Playlist.query.filter(Playlist.name == playlist_name).first()
     if not playlist:
         print '\nNo Activity Playlist exists, creating new Playlist\n'
-        playlist = Playlist(name='Playlist')
+        playlist = Playlist(name=playlist_name)
         session.add(playlist)
         session.commit()
 
@@ -47,14 +47,14 @@ def getPlayList(playlist_id):
 
 
 # this is where the magic happens
-def generatePlayList(playlist_id, plan_id):
+def generatePlayList(playlist_name, plan_id):
     songs = Song.query.all()
     if not songs: # make sure there are songs in the database
         print '\nNo songs available\n'
         #TODO: possibly add the songs?
         return
 
-    playlist = getPlayList(playlist_id)
+    playlist = getPlayList(playlist_name)
     plan = getPlan(plan_id)
     playlist.generate(plan)
     session.commit()

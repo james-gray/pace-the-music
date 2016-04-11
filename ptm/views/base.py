@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox, QMessageBox
+from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox, QMessageBox, QInputDialog
 import sys, os, layout, db
 
 # This class deals with GUI elements, adding connections to buttons etc..
@@ -50,9 +50,16 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             print 'You need to have segments to do that!'
             return
 
-        print 'Grabbing playlist'
+        playListName = self.enterPlaylistName()
+
+        if not playListName:
+            msgBox.setText('You have to enter a valid name!')
+            msgBox.exec_()
+            return
+
+        print 'Grabbing playlist: ', playListName 
         db.generatePlayList(
-            playlist_id=1,
+            playlist_name=playListName,
             plan_id=1,
         )
 
@@ -62,6 +69,14 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         msgBox.setText('Your playlist has been added to the \'playlists\' folder!')
         msgBox.exec_()
 
+    # open a dialog window to take user input for playlist name
+    def enterPlaylistName(self):
+        inputDialog = QInputDialog()
+        inputDialog.setLabelText('Enter a name for the playlist: ')
+        inputDialog.exec_()
+        name = inputDialog.textValue().replace(" ", "")
+
+        return name
 
     # adds a segment to the QtableWidget, if addToDB is true it also adds the segment to the database
     def addSegment(self, time=None, pace=None, addToDB=True):
