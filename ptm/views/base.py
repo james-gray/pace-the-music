@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem, QMenu, QAction, QComboBox, QMessageBox
-import sys, layout, db
+import sys, os, layout, db
 
 #db = DatabaseFunctions()
 
@@ -39,15 +39,16 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
                 msgBox.exec_()
                 return
         except ValueError:
+            print('Invalid time input')
             msgBox.setText('Invalid time input')
             msgBox.exec_()
-            print('Invalid time input')
             return
 
         self.addSegment()
 
     # generate a playlist when the user clicks on the "Generate Playlist" button
     def genButtonClicked(self):
+        msgBox = QMessageBox()
         if self.segmentTable.rowCount() == 0:
             print 'You need to have segments to do that!'
             return
@@ -57,6 +58,13 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             playlist_id=1,
             plan_id=1,
         )
+
+        if not os.path.exists('./playlists'): # create playlist folder if it doesn't exist
+            os.mkdir('./playlists', 0755)
+
+        msgBox.setText('Your playlist has been added to the \'playlists\' folder!')
+        msgBox.exec_()
+
 
     # adds a segment to the QtableWidget, if addToDB is true it also adds the segment to the database
     def addSegment(self, time=None, pace=None, addToDB=True):
@@ -72,6 +80,8 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         pace = self.segmentTable.cellWidget(rowPos, 0).currentText()
         if(addToDB):
             db.addSegment(1, pace, time) # Add the segment to the database
+
+        #TODO: create playlist file and add it to folder
 
     # update the database when a user edits the length of a segment
     def segmentTimeChanged(self, event):
