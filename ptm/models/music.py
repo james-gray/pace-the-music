@@ -91,6 +91,13 @@ class Playlist(Base, PtmBase):
         """
         Generate a playlist of songs given a plan.
         """
+        # Reset the playlist, JUST IN CASE!
+        for _ in range(len(self.playlist_songs)):
+            ps = self.playlist_songs.pop()
+            session.delete(ps)
+        self.playlist_songs = []
+        session.flush()
+
         slow_set, steady_set, fast_set, sprint_set = self.divide_songs_into_sets()
         # Enumeration for comparing paces with respect to speed (i.e. Slow is
         # 'less than' Steady)
