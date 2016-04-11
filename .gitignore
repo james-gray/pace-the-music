@@ -72,3 +72,6 @@ target/
 config.py
 *.db
 *.db-journal
+
+# Other
+playlists/
