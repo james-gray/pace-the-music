@@ -75,3 +75,6 @@ config.py
 
 # Other
 playlists/
+corpus/*.m4a
+corpus/*.flac
+corpus/*.wav
