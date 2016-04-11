@@ -57,6 +57,7 @@ def generatePlayList(playlist_id, plan_id):
     playlist = getPlayList(playlist_id)
     plan = getPlan(plan_id)
     playlist.generate(plan)
+    session.commit()
 
 
 # returns a list of the segments contained in the plan with id == plan_id
