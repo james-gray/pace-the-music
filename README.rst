@@ -6,6 +6,7 @@ Prerequisites
 =============
 
 PaceTheMusic is cross platform, but requires the following programs and utilities to install and run:
+
  - Python 2.7
  - SQLite 3
  - PIP v8.0.3
