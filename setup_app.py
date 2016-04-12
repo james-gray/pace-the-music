@@ -61,6 +61,9 @@ def csv_import():
     print "CSV import finished successfully."
 
 def download_corpus():
+    if not os.path.exists('./corpus'):
+        os.mkdir('./corpus', 0755)
+
     os.chdir('./corpus')
     print "Downloading corpus..."
     if not os.path.exists('./music_repo.tar'):
