@@ -72,6 +72,7 @@ def download_corpus():
         subprocess.check_call([
             'wget',
             corpus_location,
+            '-P',
             corpus_path,
         ])
     else:
