@@ -162,7 +162,7 @@ class Playlist(Base, PtmBase):
 
             # At this point the segment cannot fit any more segments without
             # overlapping with the next segment.
-            if remaining_time == 0:
+            if remaining_time == 0 and remaining_segments > 0:
                 # Just go to the next seg - set remaining_time to that segment's
                 # duration
                 remaining_time = segments[seg.position + 1].length
