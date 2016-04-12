@@ -12,8 +12,6 @@ PaceTheMusic is cross platform, but requires the following programs and utilitie
  - PIP v8.0.3
  - Qt 5
  - PyQt5
- 
-Bundled in this repository are the requisite PyQt5 modules, but you will need to install the Qt 5 framework before the application will run. See http://www.qt.io/download/ for detailed download and installation instructions.
 
 Installing PaceTheMusic
 =========================
