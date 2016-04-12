@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import csv
+import os
+import subprocess
 
 from datetime import datetime
 
@@ -10,6 +12,7 @@ from ptm.models.music import Song
 from ptm.models.music import SongMeta
 
 def csv_import():
+    print "Importing CSV song data into the database..."
     csvfile = open('song_dict.csv', 'r')
     csvreader = csv.reader(csvfile, delimiter=',', quotechar = '\"')
     artist_dict = {}
@@ -31,7 +34,7 @@ def csv_import():
 
         # Create songs
         song = Song(
-            filename = filename.decode('utf-8'),
+            filename = os.path.abspath(filename.decode('utf-8')),
             title = title.decode('utf-8'),
             date_added = datetime.utcnow(),
             artist = artist, # Assign the artist object directly
@@ -53,11 +56,24 @@ def csv_import():
         session.flush()
 
     session.commit()
+    print "CSV import finished successfully."
+
+def unzip_songs():
+    os.chdir('./corpus')
+    print "Unzipping songs..."
+    if len(os.listdir('.')) > 1:
+        print "Songs already unzipped, skipping."
+    else:
+        subprocess.check_call([
+            'tar',
+            '-xzf',
+            'music_repo.tar',
+        ])
+        print "Successfully unzipped songs."
 
 if __name__ == '__main__':
     print "Setting up the database..."
     setup_database()
     print "Finished database setup.\n"
-    print "Importing CSV song data into the database..."
     csv_import()
-    print "CSV import finished successfully."
+    #unzip_songs()

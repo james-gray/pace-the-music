@@ -1,4 +1,7 @@
+import os
 import random
+
+from ConfigParser import ConfigParser
 
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
@@ -13,6 +16,8 @@ from sqlalchemy.types import String
 from ptm.models.base import Base
 from ptm.models.base import PtmBase
 from ptm.models.base import session
+
+config = ConfigParser()
 
 class Artist(Base, PtmBase):
     """
@@ -86,6 +91,13 @@ class Playlist(Base, PtmBase):
         """
         Generate a playlist of songs given a plan.
         """
+        # Reset the playlist, JUST IN CASE!
+        for _ in range(len(self.playlist_songs)):
+            ps = self.playlist_songs.pop()
+            session.delete(ps)
+        self.playlist_songs = []
+        session.flush()
+
         slow_set, steady_set, fast_set, sprint_set = self.divide_songs_into_sets()
         # Enumeration for comparing paces with respect to speed (i.e. Slow is
         # 'less than' Steady)
@@ -203,6 +215,37 @@ class Playlist(Base, PtmBase):
                     next_seg_position += 1
                     overlap = abs(remaining_time)
                     remaining_time = segments[next_seg_position].length - overlap
+
+        self.write_playlist_to_file()
+
+    def write_playlist_to_file(self):
+        """
+        Write the generated playlist to a .pls file.
+        A .pls file is essentially an .ini file, so we write it using ConfigParser.
+        See https://en.wikipedia.org/wiki/PLS_%28file_format%29.
+        """
+        section = u'playlist'
+        config.add_section(section) # Add required [playlist] header
+        for i, song in enumerate(self.songs):
+            config.set(section, 'File%s' % str(i+1), os.path.join('file:///', song.filename.encode('utf-8')[1:]))
+            config.set(section, 'Title%s' % str(i+1), song.title.encode('utf-8'))
+            config.set(section, 'Length%s' % str(i+1), song.meta.duration)
+
+        config.set(section, 'NumberOfEntries', len(self.songs))
+        config.set(section, 'Version', 2)
+
+        tmpfile = 'playlists/%s-tmp.pls' % self.name
+        with open(tmpfile, 'w') as tmp:
+            config.write(tmp)
+
+        with open('playlists/%s.pls' % self.name, 'w') as pls:
+            # Silly hack to get around the fact that you can't actually
+            # write INI files without spaces after the = signs using ConfigParser
+            tmp = open(tmpfile, 'r')
+            for line in tmp:
+                pls.write(line.replace(' = ', '=', 1))
+            tmp.close()
+            os.remove(tmpfile)
 
     def append_song(self, song):
         """
