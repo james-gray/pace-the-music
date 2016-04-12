@@ -24,9 +24,9 @@ Install dependencies using the following command::
 
 To set up the database you will need to make sure that you have SQLite 3 installed.
 
-Next, copy `config_template.py` to the file `config.py` and set the path to 'ptm.db'. Additionally you can reduce the verbosity of database engine output to the command line by changing the `'verbose'` directive in `config.py` from `True` to `False`.
+Next, copy ``config_template.py`` to the file ``config.py`` and set the path to 'ptm.db'. Additionally you can reduce the verbosity of database engine output to the command line by changing the ``'verbose'`` directive in ``config.py`` from ``True`` to ``False``.
 
-Finally, set up the application. The following command will create the DB and tables, download the `music_repo.tar` corpus, unzip it to the `corpus` directory, and populate the database with the music metadata::
+Finally, set up the application. The following command will create the DB and tables, download the ``music_repo.tar`` corpus, unzip it to the ``corpus`` directory, and populate the database with the music metadata::
 
    $ ./setup_app.py
 
