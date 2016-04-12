@@ -45,6 +45,9 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
     # generate a playlist when the user clicks on the "Generate Playlist" button
     def genButtonClicked(self):
+        if not os.path.exists('./playlists'): # create playlist folder if it doesn't exist
+            os.mkdir('./playlists', 0755)
+
         msgBox = QMessageBox()
         if self.segmentTable.rowCount() == 0:
             print 'You need to have segments to do that!'
@@ -57,14 +60,11 @@ class PaceTheMusic(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             msgBox.exec_()
             return
 
-        print 'Grabbing playlist: ', playListName 
+        print 'Grabbing playlist: ', playListName
         db.generatePlayList(
             playlist_name=playListName,
             plan_id=1,
         )
-
-        if not os.path.exists('./playlists'): # create playlist folder if it doesn't exist
-            os.mkdir('./playlists', 0755)
 
         msgBox.setText('Your playlist has been added to the \'playlists\' folder!')
         msgBox.exec_()
