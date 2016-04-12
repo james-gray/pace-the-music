@@ -1,6 +1,8 @@
 import os
 import random
 
+from collections import OrderedDict
+
 from ConfigParser import ConfigParser
 
 from sqlalchemy import Column
@@ -18,6 +20,15 @@ from ptm.models.base import PtmBase
 from ptm.models.base import session
 
 config = ConfigParser()
+
+# Enumeration for comparing paces with respect to speed (i.e. Slow is
+# 'less than' Steady)
+PACE_ENUM = OrderedDict([
+    ('Slow', 0),
+    ('Steady', 1),
+    ('Fast', 2),
+    ('Sprint', 3),
+])
 
 class Artist(Base, PtmBase):
     """
@@ -91,22 +102,48 @@ class Playlist(Base, PtmBase):
         """
         Generate a playlist of songs given a plan.
         """
+        def get_current_set(sets, pace):
+            """
+            Return the set of songs for the given Pace if non-empty, otherwise
+            choose sets in increasing order of speed until a non-empty set is
+            found. If all sets are empty, return `None`.
+
+            Nested because it only makes sense to use this within generate().
+            """
+            if sets[pace]:
+                # Current set is non-empty - guard statement returns early
+                return sets[pace]
+
+            # The set for the current segment pace is empty - choose the
+            # next fastest set
+            print "    NO SONGS LEFT IN CURRENT SET %s! Choosing a new set" % pace
+            paces = PACE_ENUM.keys()
+            for _ in xrange(4):
+                # Get new pace using the PACE_ENUM.
+                # Choose the next paces in increasing speed order, unless the
+                # current pace is a Sprint, in which case we wrap around to Slow.
+                pace = paces[(paces.index(pace) + 1) % 4] # modulo to wrap around to Slow
+                if sets[pace]:
+                    # We have found a non-empty set - continue with this
+                    print "        Found nonempty set %s" % pace
+                    return sets[pace]
+            else:
+                # At this point NONE of the pace sets had any songs left,
+                # which means we have exhausted our corpus of songs.
+                # Break here - the playlist is finished as there's nothing
+                # left to add.
+                print "        ALL SETS EXHAUSTED"
+                return None
+
+
         # Reset the playlist, just in case!
-        for _ in range(len(self.playlist_songs)):
+        for _ in xrange(len(self.playlist_songs)):
             ps = self.playlist_songs.pop()
             session.delete(ps)
         self.playlist_songs = []
         session.flush()
 
         slow_set, steady_set, fast_set, sprint_set = self.divide_songs_into_sets()
-        # Enumeration for comparing paces with respect to speed (i.e. Slow is
-        # 'less than' Steady)
-        pace_enum = {
-            'Slow': 1,
-            'Steady': 2,
-            'Fast': 3,
-            'Sprint': 4,
-        }
         # Add sets to a dict to easily access by hash
         sets = {
             'Slow': slow_set,
@@ -129,10 +166,16 @@ class Playlist(Base, PtmBase):
             print "NEW SEGMENT: %s" % seg
             remaining_segments -= 1
             pace = seg.pace.speed
+
+            current_set = get_current_set(sets, pace)
+            if not current_set:
+                # We have exhausted the corpus of songs! Our playlist is finished
+                break
+
             # Pick subset of songs that can fit in the time remaining
             subset = [
                 song
-                for song in sets[pace]
+                for song in current_set
                 if song.meta.duration <= remaining_time
             ]
 
@@ -146,7 +189,7 @@ class Playlist(Base, PtmBase):
 
                 # Remove the song from relevant sets
                 subset.remove(song)
-                sets[pace].remove(song)
+                current_set.remove(song)
 
                 # Recalculate time remaining
                 remaining_time -= song.meta.duration
@@ -158,10 +201,17 @@ class Playlist(Base, PtmBase):
                     if song.meta.duration <= remaining_time
                 ]
 
-            print "    Cannot fit any more whole songs in this segment."
-
             # At this point the segment cannot fit any more segments without
             # overlapping with the next segment.
+            print "    Cannot fit any more whole songs in this segment."
+
+            # It's possible at this point that the current set has been exhausted
+            # of songs, so we check to see if we need to get the next nonempty set
+            current_set = get_current_set(sets, pace)
+            if not current_set:
+                # No more songs
+                break
+
             if remaining_time == 0 and remaining_segments > 0:
                 # Just go to the next seg - set remaining_time to that segment's
                 # duration
@@ -170,14 +220,15 @@ class Playlist(Base, PtmBase):
             elif remaining_segments == 0:
                 # Our run is almost done - pick a random song at the current
                 # segment pace
-                song = random.choice(sets[pace])
+                song = random.choice(current_set)
                 self.append_song(song)
-                sets[pace].remove(song)
+                current_set.remove(song)
                 print "        THIS IS THE LAST SEGMENT. Adding random song"
             else:
+                # We will (potentially) have to overlap with the next segment.
                 next_seg = segments[seg.position + 1]
-                if pace_enum[next_seg.pace.speed] > pace_enum[seg.pace.speed] \
-                        and sets[pace][0].meta.duration / 2 > remaining_time:
+                if PACE_ENUM[next_seg.pace.speed] > PACE_ENUM[seg.pace.speed] \
+                        and current_set[0].meta.duration / 2 > remaining_time:
                     # The next segment is at a faster pace.
                     # Here we choose a song from the current segment's set iff
                     # 50% or more of the song will take place in the current
@@ -191,9 +242,9 @@ class Playlist(Base, PtmBase):
                     # Pick the shortest song from the current pace's set, so we
                     # minimize the amount of time the song cuts into the next
                     # segment
-                    song = sets[pace][0]
+                    song = current_set[0]
                     self.append_song(song)
-                    sets[pace].remove(song)
+                    current_set.remove(song)
                     print "        Add song from curr pace."
 
                 # Calculate the overlap between the last song of this segment
@@ -225,7 +276,8 @@ class Playlist(Base, PtmBase):
         See https://en.wikipedia.org/wiki/PLS_%28file_format%29.
         """
         section = u'playlist'
-        config.add_section(section) # Add required [playlist] header
+        if not config.has_section(section):
+            config.add_section(section) # Add required [playlist] header
 
         for i, song in enumerate(self.songs):
             # Add the required File, Title, and Length sections for each song, as per
