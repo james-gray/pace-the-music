@@ -233,19 +233,18 @@ class Playlist(Base, PtmBase):
                     # Here we choose a song from the current segment's set iff
                     # 50% or more of the song will take place in the current
                     # segment.
-                    next_pace = next_seg.pace.speed
-                    song = sets[next_pace][0]
-                    self.append_song(song)
-                    sets[next_pace].remove(song)
-                    print "        Next segment is faster, add song from next pace."
-                else:
-                    # Pick the shortest song from the current pace's set, so we
-                    # minimize the amount of time the song cuts into the next
-                    # segment
-                    song = current_set[0]
-                    self.append_song(song)
-                    current_set.remove(song)
-                    print "        Add song from curr pace."
+                    # Otherwise, pick the shortest song from the current pace's
+                    # set, so we minimize the amount of time the song cuts into
+                    # the next segment
+                    current_set = get_current_set(sets, next_seg.pace.speed)
+                    if not current_set:
+                        # No more songs
+                        break
+
+                song = current_set[0]
+                self.append_song(song)
+                current_set.remove(song)
+                print "        Add song from curr pace."
 
                 # Calculate the overlap between the last song of this segment
                 # and the next segment
