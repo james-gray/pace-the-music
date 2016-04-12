@@ -5,6 +5,7 @@ import subprocess
 
 from datetime import datetime
 
+from database import drop_database
 from database import setup_database
 from ptm.models.base import session
 from ptm.models.music import Artist
@@ -61,34 +62,38 @@ def csv_import():
     print "CSV import finished successfully."
 
 def download_corpus():
-    if not os.path.exists('./corpus'):
-        os.mkdir('./corpus', 0755)
+    corpus_path = './corpus'
+    if not os.path.exists(corpus_path):
+        os.mkdir(corpus_path, 0755)
 
-    os.chdir('./corpus')
     print "Downloading corpus..."
-    if not os.path.exists('./music_repo.tar'):
+    if not os.path.exists('./corpus/music_repo.tar'):
         # Download the music corpus from James's cheap VPS that he's hosting it on
         subprocess.check_call([
             'wget',
             corpus_location,
+            corpus_path,
         ])
     else:
         print "Corpus already downloaded, skipping."
 
     print "Unzipping songs..."
-    if len(os.listdir('.')) > 1:
+    if len(os.listdir(corpus_path)) > 1:
         print "Songs already unzipped, skipping."
     else:
         subprocess.check_call([
             'tar',
             '-xzf',
             'music_repo.tar',
+            corpus_path,
         ])
         print "Successfully unzipped songs."
 
 if __name__ == '__main__':
+    print "Dropping existing database..."
+    drop_database()
     print "Setting up the database..."
     setup_database()
     print "Finished database setup.\n"
-    csv_import()
     download_corpus()
+    csv_import()
