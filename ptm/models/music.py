@@ -91,7 +91,7 @@ class Playlist(Base, PtmBase):
         """
         Generate a playlist of songs given a plan.
         """
-        # Reset the playlist, JUST IN CASE!
+        # Reset the playlist, just in case!
         for _ in range(len(self.playlist_songs)):
             ps = self.playlist_songs.pop()
             session.delete(ps)
@@ -226,14 +226,19 @@ class Playlist(Base, PtmBase):
         """
         section = u'playlist'
         config.add_section(section) # Add required [playlist] header
+
         for i, song in enumerate(self.songs):
+            # Add the required File, Title, and Length sections for each song, as per
+            # the PLS spec
             config.set(section, 'File%s' % str(i+1), os.path.join('file:///', song.filename.encode('utf-8')[1:]))
             config.set(section, 'Title%s' % str(i+1), song.title.encode('utf-8'))
             config.set(section, 'Length%s' % str(i+1), song.meta.duration)
 
+        # Add required additional sections
         config.set(section, 'NumberOfEntries', len(self.songs))
         config.set(section, 'Version', 2)
 
+        # Write the config file to a temporary file
         tmpfile = 'playlists/%s-tmp.pls' % self.name
         with open(tmpfile, 'w') as tmp:
             config.write(tmp)

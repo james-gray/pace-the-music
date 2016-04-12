@@ -17,6 +17,9 @@ from config import db
 corpus_location = 'http://www.reynolds-theatre.com/content/music_repo.tar'
 
 def csv_import():
+    """
+    Import the song metadata from song_dict.csv into the database.
+    """
     print "Importing CSV song data into the database..."
     csvfile = open('song_dict.csv', 'r')
     csvreader = csv.reader(csvfile, delimiter=',', quotechar = '\"')
@@ -66,11 +69,13 @@ def csv_import():
 def download_corpus():
     corpus_path = './corpus'
     if not os.path.exists(corpus_path):
+        # Create the corpus dir
         os.mkdir(corpus_path, 0755)
 
     print "Downloading corpus..."
     if not os.path.exists('./corpus/music_repo.tar'):
-        # Download the music corpus from James's cheap VPS that he's hosting it on
+        # Download the music corpus from James's cheap DigitalOcean VPS that
+        # he's hosting it on
         subprocess.check_call([
             'wget',
             corpus_location,
