@@ -75,6 +75,7 @@ config.py
 
 # Other
 playlists/
+corpus/music_repo.tar
 corpus/*.m4a
 corpus/*.flac
 corpus/*.wav
