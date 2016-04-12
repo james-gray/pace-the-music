@@ -26,7 +26,11 @@ Setting up the app
 
 To set up the database you will need to make sure that you have SQLite 3 installed.
 
-Next, copy `config_template.py` to the file `config.py` and set the path to 'ptm.db'. Finally, create the DB and tables::
+Next, copy `config_template.py` to the file `config.py` and set the path to 'ptm.db'. Finally, set up the application. The following command will create the DB and tables, download the `music_repo.tar` corpus, unzip it to the `corpus` directory, and populate the database with the music metadata::
+
+   $ ./setup_app.py
+
+You can also simply create the database alone, without performing the additional setup, with the following command::
 
    $ ./database.py create
 
