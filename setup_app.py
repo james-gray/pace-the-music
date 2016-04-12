@@ -12,6 +12,8 @@ from ptm.models.music import Artist
 from ptm.models.music import Song
 from ptm.models.music import SongMeta
 
+from config import db
+
 corpus_location = 'http://www.reynolds-theatre.com/content/music_repo.tar'
 
 def csv_import():
@@ -92,8 +94,9 @@ def download_corpus():
         print "Successfully unzipped songs."
 
 if __name__ == '__main__':
-    print "Dropping existing database..."
-    drop_database()
+    if os.path.exists(db['path']):
+        print "Dropping existing database..."
+        drop_database()
     print "Setting up the database..."
     setup_database()
     print "Finished database setup.\n"
