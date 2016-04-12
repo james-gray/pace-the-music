@@ -11,6 +11,8 @@ from ptm.models.music import Artist
 from ptm.models.music import Song
 from ptm.models.music import SongMeta
 
+corpus_location = 'http://www.reynolds-theatre.com/content/music_repo.tar'
+
 def csv_import():
     print "Importing CSV song data into the database..."
     csvfile = open('song_dict.csv', 'r')
@@ -58,8 +60,18 @@ def csv_import():
     session.commit()
     print "CSV import finished successfully."
 
-def unzip_songs():
+def download_corpus():
     os.chdir('./corpus')
+    print "Downloading corpus..."
+    if not os.path.exists('./music_repo.tar'):
+        # Download the music corpus from James's cheap VPS that he's hosting it on
+        subprocess.check_call([
+            'wget',
+            corpus_location,
+        ])
+    else:
+        print "Corpus already downloaded, skipping."
+
     print "Unzipping songs..."
     if len(os.listdir('.')) > 1:
         print "Songs already unzipped, skipping."
@@ -76,4 +88,4 @@ if __name__ == '__main__':
     setup_database()
     print "Finished database setup.\n"
     csv_import()
-    #unzip_songs()
+    download_corpus()
