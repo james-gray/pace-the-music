@@ -84,7 +84,8 @@ def download_corpus():
         subprocess.check_call([
             'tar',
             '-xzf',
-            'music_repo.tar',
+            './corpus/music_repo.tar',
+            '-C',
             corpus_path,
         ])
         print "Successfully unzipped songs."
