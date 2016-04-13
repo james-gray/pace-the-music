@@ -30,7 +30,7 @@ The following design specification outlines our plan to create a physical activi
 \end{abstract}
 
 \section{Introduction}
-Many people enjoy listening to music while they exercise, and in many cases music itself can motivate the listener to put in even more effort than they would otherwise. \cite{Shivar} However, some types of exercise require strict adherence to a pre-existing training plan - for example, runners and cyclists often train at different paces for different portions of their activity. In these instances, the influence of music on an athlete's pace or performance could be detrimental; a very fast song might subconsciously cause a runner to run at a faster pace than they intended to.
+Many people enjoy listening to music while they exercise, and in many cases music itself can motivate the listener to put in even more effort than they would otherwise \cite{Shivar}. However, some types of exercise require strict adherence to a pre-existing training plan - for example, runners and cyclists often train at different paces for different portions of their activity. In these instances, the influence of music on an athlete's pace or performance could be detrimental; a very fast song might subconsciously cause a runner to run at a faster pace than they intended to.
 
 To address this problem, we plan to create a playlist generation utility with a focus on creating playlists for various types of physical activity such as running, cycling, or strength training. The user of this utility will input an activity plan, specifying features such as running pace or step frequency over the course of the activity. Given the plan as input, the playlist generation utility will create a playlist from an existing set of songs, basing the playlist on audio features such as tempo, genre, mood, and subjective energy level.
 
@@ -166,7 +166,7 @@ The algorithm itself can be summarized using the following pseudocode:
 
 Essentially, each segment is filled with random songs that match the segment's pace, until no more songs at that pace can fit into the segment without overlapping the next - at this point, some logic is in place to determine whether to choose a song at the current pace or at the next segment's pace. Our playlist algorithm has been set up to favour the playlist speeding up early rather than staying slow for too long. This is because we believe a slow song overlapping into a faster segment is more detrimental than a faster song overlapping into a slow segment; people are more likely to be slow even when the music tells them to be fast than they are to be fast when the music tells them to be slow.
 
-If one of the subsets of songs is empty due to each song from the subset having already been selected, the generation algorithm implementation contains logic to choose from the next non-empty subset, in increasing speed order. For example, if the ``slow'' set is empty, the algorithm will first attempt to pull from the ``Steady'' set - if the ``Steady'' set is also empty, it will next try the ``Fast'' set, and so on. In the case of the ``Sprint'' set being empty, the algorithm will ``wrap around'' to the slow set.
+If one of the subsets of songs is empty due to each song from the subset having already been selected, the generation algorithm implementation contains logic to choose from the next non-empty subset, in increasing speed order. For example, if the ``Slow'' set is empty, the algorithm will first attempt to pull from the ``Steady'' set - if the ``Steady'' set is also empty, it will next try the ``Fast'' set, and so on. In the case of the ``Sprint'' set being empty, the algorithm will ``wrap around'' to the ``Slow'' set.
 
 The algorithm will continue to add songs to the playlist until one of two end conditions is reached: either we have reached the last segment and there is no more time remaining on the counter, or we have run out of songs from all of the sets. In either case, the playlist will then be written out to a file and the function will terminate.
 
@@ -180,7 +180,7 @@ The algorithm will continue to add songs to the playlist until one of two end co
 
 \subsubsection{Playlist Format}
 
-There are a variety of playlist formats available \cite{Gonze} and each has their own advantages and disadvantages. We opted to use the PLS file format. This choice was for two main reasons; first, the format is widely supported by a range of media players, most notably iTunes and VLC; second, the format is essentially a type of INI file, which are easy to read and write in Python using the ``ConfigParser'' module. By specifying the title, file path, and length of songs in the playlist file, the file can be simply opened in Mac or Linux in either VLC or iTunes, and will automatically locate the songs and load them into the player.
+There are a variety of playlist formats available \cite{Gonze} and each has their own advantages and disadvantages. We opted to use the PLS file format. This choice was for two main reasons; first, the format is widely supported by a range of media players, most notably iTunes and VLC; second, the format is essentially a type of INI file, which are easy to read and write in Python using the ``ConfigParser'' module. By specifying the title, file path, and length of songs in the playlist file, the file can be simply opened in Mac, Linux, or Windows in either VLC or iTunes, and will automatically locate the songs and load them into the player.
 
 \subsubsection{UI}
 
@@ -210,7 +210,7 @@ The front end of the application has been completed and tied together with the d
 \label{fig:overview}
 \end{figure}
 
-The above figure shows an overview of the completed UI. Users define the length and pace of segments using the controls on the bottom, and click the ``Add Segment'' button to add the segments to the above table. Once a desired list of segments has been chosen, users can click the ``Generate Playlist'' button to create a playlist.
+Figure \ref{fig:overview} shows an overview of the completed UI. Users define the length and pace of segments using the controls on the bottom, and click the ``Add Segment'' button to add the segments to the above table. Once a desired list of segments has been chosen, users can click the ``Generate Playlist'' button to create a playlist.
 
 The base structure of the UI layout has also been updated, allowing the UI to scale to different resolutions. An additional change to the layout of widgets was also required due to issues with UI elements scaling differently on machines running OS X. This update was done using Qt Creator. The issue was that the central and input layout widgets of the UI were in a grid format. Switching to a vertical layout widget resolved the issue.
 
